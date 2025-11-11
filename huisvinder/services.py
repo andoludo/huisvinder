@@ -1,0 +1,82 @@
+import logging
+import tempfile
+from contextlib import contextmanager
+from pathlib import Path
+from time import sleep
+from typing import Optional, Generator, Any, Callable
+import undetected_chromedriver as uc  # type: ignore[import-untyped]
+from bs4 import BeautifulSoup
+from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions
+
+logger = logging.getLogger(__name__)
+
+
+@contextmanager
+def web_browser(
+    url: str,
+    load_strategy_none: bool = False,
+    headless: bool = False,
+    callback: Optional[Callable[[WebDriver], None]] = None,
+) -> Generator[WebDriver, Any, None]:
+    browser = uc.Chrome(headless=headless, use_subprocess=False)
+    browser.set_page_load_timeout(15)
+
+    try:
+        browser.get(url)
+    except Exception:
+        browser.execute_script("window.stop();")
+    if callback:
+        sleep(10)
+        callback(browser)
+    sleep(2)
+    yield browser
+    browser.quit()
+
+
+@contextmanager
+def soup_page(browser: WebDriver) -> Generator[BeautifulSoup, Any, None]:
+    with tempfile.NamedTemporaryFile(suffix=".html", delete=True) as page:
+        page_source_code = browser.page_source.encode("utf-8")
+        Path(page.name).write_bytes(page_source_code)
+        yield BeautifulSoup(page, "html.parser")
+
+
+@contextmanager
+def temporary_web_page(
+    url: str,
+    load_strategy_none: bool = False,
+    headless: bool = False,
+    callback: Optional[Callable[[WebDriver], None]] = None,
+) -> Generator[BeautifulSoup, Any, None]:
+    with web_browser(
+        url, load_strategy_none, headless, callback=callback
+    ) as browser, soup_page(browser) as soup:
+        yield soup
+        browser.quit()
+
+
+def find_cookie_banner(
+    browser: WebDriver, xpath: str, iframe: Optional[str] = None
+) -> None:
+    if iframe is None:
+        try:
+            button = browser.find_element(By.CSS_SELECTOR, xpath)
+            button.click()
+        except Exception as e:
+            logger.warning(f"Cookie banner: {e}")
+    else:
+        try:
+            WebDriverWait(browser, 10).until(
+                expected_conditions.frame_to_be_available_and_switch_to_it(
+                    (By.XPATH, iframe)
+                )
+            )
+            WebDriverWait(browser, 10).until(
+                expected_conditions.element_to_be_clickable((By.XPATH, xpath))
+            ).click()
+            browser.switch_to.default_content()
+        except Exception as e:
+            logger.warning(f"Cookie banner: {e}")
