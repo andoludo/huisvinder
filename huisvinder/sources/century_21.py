@@ -2,7 +2,7 @@ import datetime
 from typing import List
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.services import temporary_web_page
+from huisvinder.utils import temporary_web_page
 from huisvinder.types import Sources
 
 

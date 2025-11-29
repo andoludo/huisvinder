@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from datetime import date
+from datetime import date, datetime
 from typing import Optional, List
 
 from pydantic import BaseModel
@@ -9,7 +9,7 @@ from huisvinder.types import Sources
 
 class BaseHouse(BaseModel):
     source: Sources
-    created_at: date
+    created_at: datetime
     link: str
     display_price: Optional[str] = None
     city: Optional[str] = None
@@ -41,6 +41,9 @@ class BaseSource(BaseModel):
     def get_base_house(self) -> List[BaseHouse]:
         base_houses = []
         for page_url in self._get_page_urls():
-            page_data = self._get_page_data(page_url)
+            try:
+                page_data = self._get_page_data(page_url)
+            except Exception:
+                continue
             base_houses.extend(page_data)
         return base_houses

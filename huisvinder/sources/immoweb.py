@@ -7,10 +7,11 @@ from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
+from tenacity import stop_after_attempt, retry, wait_exponential
 from undetected_chromedriver import WebElement  # type: ignore
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.services import web_browser
+from huisvinder.utils import web_browser
 from huisvinder.types import Sources
 
 
@@ -21,8 +22,8 @@ class Selector(BaseModel):
 
 
 def remove_banner(browser: WebDriver) -> None:
-    host = WebDriverWait(browser, 30).until(
-        expected_conditions.presence_of_element_located((By.XPATH, "/html/body/div[5]"))
+    host = WebDriverWait(browser, 60).until(
+        expected_conditions.presence_of_element_located((By.CSS_SELECTOR, "#usercentrics-root"))
     )
     for _ in range(60):  # 10 checks per second
         shadow = browser.execute_script("return arguments[0].shadowRoot", host)
@@ -85,7 +86,11 @@ class Immoweb(BaseSource):
                 for page_number in range(2, max_page + 1)
             ],
         ]
-
+    @retry(
+        reraise=True,                      # re-raise final exception after retries
+        stop=stop_after_attempt(3),        # max 5 attempts
+        wait=wait_exponential(multiplier=0.5, min=0.5, max=8.0)
+    )
     def _get_page_data(self, page_url: str) -> List[BaseHouse]:
         with web_browser(page_url, headless=False, callback=remove_banner) as browser:
 

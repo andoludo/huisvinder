@@ -1,16 +1,10 @@
 import logging
-import re
-import tempfile
-from contextlib import contextmanager
 from pathlib import Path
-from time import sleep
-from typing import Optional, Generator, Any, Callable
+
 import undetected_chromedriver as uc  # type: ignore[import-untyped]
-from bs4 import BeautifulSoup
-from pydantic import BaseModel, model_validator
-from selenium.webdriver.chrome.webdriver import WebDriver
 
 from huisvinder.sources.century_21 import Century21
+from huisvinder.sources.immovlan import Immovlan
 from huisvinder.sources.immoweb import Immoweb
 
 logger = logging.getLogger(__name__)
@@ -27,5 +21,18 @@ def test_century() -> None:
 def test_immoweb() -> None:
     immoweb = Immoweb()
     urls = immoweb._get_page_urls()
-    base_houses = immoweb._get_page_data(urls[0])
-    assert base_houses
+    sources = []
+    for url in urls[:3]:
+        base_houses = immoweb._get_page_data(url)
+        sources.extend(base_houses)
+    assert sources
+
+
+def test_immovlan() -> None:
+    immovlan = Immovlan()
+    urls = immovlan._get_page_urls()
+    sources = []
+    for url in urls[:3]:
+        base_houses = immovlan._get_page_data(url)
+        sources.extend(base_houses)
+    assert sources
