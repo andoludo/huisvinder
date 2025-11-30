@@ -10,5 +10,3 @@ class BaseHouseORM(SQLModel, BaseHouse, table=True):  # type: ignore
     source: str = Field(index=True, primary_key=True)
     created_at: datetime = Field(primary_key=True, index=True)
     link: str = Field(primary_key=True, index=True)
-
-

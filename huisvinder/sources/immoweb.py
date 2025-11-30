@@ -23,7 +23,9 @@ class Selector(BaseModel):
 
 def remove_banner(browser: WebDriver) -> None:
     host = WebDriverWait(browser, 60).until(
-        expected_conditions.presence_of_element_located((By.CSS_SELECTOR, "#usercentrics-root"))
+        expected_conditions.presence_of_element_located(
+            (By.CSS_SELECTOR, "#usercentrics-root")
+        )
     )
     for _ in range(60):  # 10 checks per second
         shadow = browser.execute_script("return arguments[0].shadowRoot", host)
@@ -86,10 +88,11 @@ class Immoweb(BaseSource):
                 for page_number in range(2, max_page + 1)
             ],
         ]
+
     @retry(
-        reraise=True,                      # re-raise final exception after retries
-        stop=stop_after_attempt(3),        # max 5 attempts
-        wait=wait_exponential(multiplier=0.5, min=0.5, max=8.0)
+        reraise=True,  # re-raise final exception after retries
+        stop=stop_after_attempt(3),  # max 5 attempts
+        wait=wait_exponential(multiplier=0.5, min=0.5, max=8.0),
     )
     def _get_page_data(self, page_url: str) -> List[BaseHouse]:
         with web_browser(page_url, headless=False, callback=remove_banner) as browser:

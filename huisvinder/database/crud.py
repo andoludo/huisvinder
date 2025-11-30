@@ -20,7 +20,6 @@ class HuisVinderDb(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     database_path: Path
 
-
     @cached_property
     def _engine(self) -> Engine:
         database_url = f"sqlite:///{Path(self.database_path)}"
@@ -34,8 +33,6 @@ class HuisVinderDb(BaseModel):
     def add_houses(self, houses: List[BaseHouse]) -> None:
         with Session(self._engine) as session:
             houses_ = [h.model_dump() for h in houses]
-            stmt = (
-                insert(BaseHouseORM).prefix_with("OR REPLACE").values(houses_)
-            )
+            stmt = insert(BaseHouseORM).prefix_with("OR REPLACE").values(houses_)
             session.exec(stmt)  # type: ignore
             session.commit()

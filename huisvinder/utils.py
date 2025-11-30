@@ -85,3 +85,17 @@ def find_cookie_banner(
             browser.switch_to.default_content()
         except Exception as e:
             logger.warning(f"Cookie banner: {e}")
+
+
+def scroll_to_bottom(driver: WebDriver, pause_time: int = 2) -> None:
+    last_height = driver.execute_script("return document.body.scrollHeight")
+
+    while True:
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(pause_time)
+        new_height = driver.execute_script("return document.body.scrollHeight")
+
+        if new_height == last_height:
+            break
+
+        last_height = new_height
