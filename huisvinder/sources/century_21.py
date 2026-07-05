@@ -1,59 +1,83 @@
 import datetime
-from typing import List
+import re
+from typing import List, Optional
+
+from bs4 import Tag
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import temporary_web_page
+from huisvinder.utils import get_static_soup
 from huisvinder.types import Sources
+
+MAX_PRICE = 400000
+ADDRESS_PATTERN = re.compile(r"\b(\d{4})\s+(.+)$")
+
+
+def _field_value(card: Tag, field: str) -> Optional[str]:
+    value_tag = card.select_one(
+        f".oc-property-fields__item--{field} .oc-property-fields__value"
+    )
+    return value_tag.get_text(strip=True) if value_tag else None
 
 
 class Century21(BaseSource):
     name: Sources = "Century21"
-    base_url: str = (
-        "https://www.connect-immo.be/en/for-sale/houses,apartments/max-400000-euro"
-    )
+    base_url: str = "https://connect-immo.be/en/for-sale/"
 
     def _get_page_urls(self) -> list[str]:
-        max_page = 15
-        return [
-            self.base_url,
-            *[
-                f"{self.base_url}/page-{page_number}"
-                for page_number in range(1, max_page + 1)
-            ],
-        ]
+        max_page = 5
+        urls = []
+        for property_type in ["house", "apartment"]:
+            query = f"?oc_property_type={property_type}&oc_price_max={MAX_PRICE}"
+            urls.append(f"{self.base_url}{query}")
+            urls.extend(
+                f"{self.base_url}page/{page_number}/{query}"
+                for page_number in range(2, max_page + 1)
+            )
+        return urls
 
     def _get_page_data(self, page_url: str) -> List[BaseHouse]:
-        with temporary_web_page(page_url, headless=False) as soup:
-            properties = soup.select("article.grid-content.property-grid")
+        soup = get_static_soup(page_url)
+        cards = soup.select("div.e-loop-item.property")
 
-            results = []
+        results = []
+        for card in cards:
+            link_tag = card.select_one("a[href*='/properties/']")
+            if link_tag is None:
+                continue
+            link = str(link_tag["href"])
 
-            for prop in properties:
-                link = prop.select_one("a")["href"]  # type: ignore
-                category = prop.select_one(".category").get_text(strip=True)  # type: ignore
-                city = prop.select_one(".city").get_text(strip=True)  # type: ignore
-                price = prop.select_one(".price").get_text(strip=True)  # type: ignore
-                features = {}
-                feature_items = prop.select(".property__features li")
-                if price in ["Check all references"]:
+            price = city = category = None
+            headings = [
+                heading
+                for heading in card.select(".elementor-heading-title")
+                if not heading.find_parent(class_="oc-status")
+            ]
+            for heading in headings:
+                text = heading.get_text(strip=True)
+                if not text:
                     continue
+                if text.startswith("€"):
+                    price = text
+                    continue
+                address_match = ADDRESS_PATTERN.search(text)
+                if address_match:
+                    city = address_match.group(2).strip().title()
+                elif category is None:
+                    category = text
 
-                for li in feature_items:
-                    label = li.select_one("i").get_text(strip=True)  # type: ignore
-                    value = li.get_text(strip=True).replace(label, "").strip()
-                    features[label] = value
+            if price is None:
+                continue
 
-                results.append(
-                    {
-                        "source": self.name,
-                        "created_at": datetime.date.today(),
-                        "link": link,
-                        "category": category,
-                        "city": city,
-                        "display_price": price,
-                        "bedrooms": features.get("Bedrooms"),
-                        "living_area": features.get("Living area"),
-                        "surface_ground": features.get("Titles.surface_ground"),
-                    }
-                )
-            return [BaseHouse.model_validate(r) for r in results]
+            results.append(
+                {
+                    "source": self.name,
+                    "created_at": datetime.date.today(),
+                    "link": link,
+                    "category": category,
+                    "city": city,
+                    "display_price": price,
+                    "bedrooms": _field_value(card, "bedrooms"),
+                    "living_area": _field_value(card, "surface_total"),
+                }
+            )
+        return [BaseHouse.model_validate(r) for r in results]
