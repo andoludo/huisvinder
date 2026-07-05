@@ -24,6 +24,7 @@ dev = [
     "mypy>=1.8",
     "ruff>=0.3",
     "types-requests>=2.32",
+    "pytest-cov>=7.1.0",
 ]
 
 [build-system]
@@ -34,8 +35,9 @@ build-backend = "hatchling.build"
 packages = ["huisvinder"]
 
 [tool.pytest.ini_options]
+addopts = "-m 'not integration' --cov=huisvinder --cov-report=term-missing:skip-covered"
 markers = [
-    "integration: browser-based tests that need a local Chrome installation",
+    "integration: live tests that hit the real websites",
 ]
 
 [tool.mypy]

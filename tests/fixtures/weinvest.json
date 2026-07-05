@@ -1,0 +1,561 @@
+{
+ "data": [
+  {
+   "id": 138896,
+   "name": "Diesterstraat 23 bus 17, 3800 Sint-Truiden",
+   "category": "commercial",
+   "country": "be",
+   "type": {
+    "en": "individual shop",
+    "fr": "commerce individuel",
+    "nl": "individuele handelszaak"
+   },
+   "city": "Sint-Truiden",
+   "transactionType": "for-sale",
+   "hasAdvertisedPricePublic": true,
+   "isBidding": false,
+   "priceAsAdvertised": 239000,
+   "priceForMonthlyAnnuity": null,
+   "highlightStatus": null,
+   "rooms": null,
+   "bedroomCount": 0,
+   "livableArea": 204,
+   "landArea": null,
+   "postalCode": "3800",
+   "geoLat": 50.81726,
+   "geoLong": 5.18423,
+   "pictures": [
+    {
+     "id": "348c6c5c-48f9-41e8-afaa-43adf95bbadb",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/348c6c5c-48f9-41e8-afaa-43adf95bbadb.jpg",
+     "name": null,
+     "ordinal": 1,
+     "isPrivate": false
+    },
+    {
+     "id": "f5290033-b9b5-4f27-a710-4847abd91a34",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/f5290033-b9b5-4f27-a710-4847abd91a34.jpg",
+     "name": null,
+     "ordinal": 2,
+     "isPrivate": false
+    },
+    {
+     "id": "a7c073c1-1ff7-4550-94b9-b21e328b295b",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/a7c073c1-1ff7-4550-94b9-b21e328b295b.jpg",
+     "name": null,
+     "ordinal": 3,
+     "isPrivate": false
+    },
+    {
+     "id": "a9f27721-70b2-428e-9c6c-ac1bdb51d316",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/a9f27721-70b2-428e-9c6c-ac1bdb51d316.jpg",
+     "name": null,
+     "ordinal": 4,
+     "isPrivate": false
+    },
+    {
+     "id": "662a5f35-df2e-423b-b5cd-3365c5aa7860",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/662a5f35-df2e-423b-b5cd-3365c5aa7860.jpg",
+     "name": null,
+     "ordinal": 5,
+     "isPrivate": false
+    },
+    {
+     "id": "50608493-f5be-4765-86eb-71f8176bf6ca",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/50608493-f5be-4765-86eb-71f8176bf6ca.jpg",
+     "name": null,
+     "ordinal": 6,
+     "isPrivate": false
+    },
+    {
+     "id": "8e3ef154-1ca5-4230-8866-1e74dda0021e",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/8e3ef154-1ca5-4230-8866-1e74dda0021e.jpg",
+     "name": null,
+     "ordinal": 7,
+     "isPrivate": false
+    },
+    {
+     "id": "75682ed7-142f-4d2f-aacb-8c13d621648e",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/75682ed7-142f-4d2f-aacb-8c13d621648e.jpg",
+     "name": null,
+     "ordinal": 8,
+     "isPrivate": false
+    },
+    {
+     "id": "ead30245-67b8-4eec-bfd0-306d2c7243b7",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/ead30245-67b8-4eec-bfd0-306d2c7243b7.jpg",
+     "name": null,
+     "ordinal": 9,
+     "isPrivate": false
+    },
+    {
+     "id": "be0822fc-2e02-4017-8b45-75d051452cc1",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/be0822fc-2e02-4017-8b45-75d051452cc1.jpg",
+     "name": null,
+     "ordinal": 10,
+     "isPrivate": false
+    },
+    {
+     "id": "5837b199-9a3c-4939-884d-aae3902eca73",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/5837b199-9a3c-4939-884d-aae3902eca73.jpg",
+     "name": null,
+     "ordinal": 11,
+     "isPrivate": false
+    },
+    {
+     "id": "a3c16b1c-0ebb-4317-87ed-7bec9b3bb02a",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/a3c16b1c-0ebb-4317-87ed-7bec9b3bb02a.jpg",
+     "name": null,
+     "ordinal": 12,
+     "isPrivate": false
+    },
+    {
+     "id": "10856638-d13e-4348-9e7b-0574a5945f4d",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/10856638-d13e-4348-9e7b-0574a5945f4d.jpg",
+     "name": null,
+     "ordinal": 13,
+     "isPrivate": false
+    },
+    {
+     "id": "33876089-b8cd-4a4d-9abb-57d052a383db",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/33876089-b8cd-4a4d-9abb-57d052a383db.jpg",
+     "name": null,
+     "ordinal": 14,
+     "isPrivate": false
+    },
+    {
+     "id": "eb5eb512-c06d-4022-ba16-b95bfb8c5dc1",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/eb5eb512-c06d-4022-ba16-b95bfb8c5dc1.jpg",
+     "name": null,
+     "ordinal": 15,
+     "isPrivate": false
+    }
+   ],
+   "status": "available",
+   "generalCondition": "good",
+   "updatedAt": "2026-02-04T17:42:08.900Z",
+   "estateOfTheMonth": false,
+   "energyScore": "d",
+   "totalCount": "31"
+  },
+  {
+   "id": 139535,
+   "name": "Kardinaal Mercierlaan 59 bus 0102 - 3001 Heverlee",
+   "category": "apartment",
+   "country": "be",
+   "type": {
+    "en": "studio",
+    "fr": "studio",
+    "nl": "studio"
+   },
+   "city": "Leuven Heverlee",
+   "transactionType": "for-sale",
+   "hasAdvertisedPricePublic": true,
+   "isBidding": false,
+   "priceAsAdvertised": 199000,
+   "priceForMonthlyAnnuity": null,
+   "highlightStatus": null,
+   "rooms": null,
+   "bedroomCount": 0,
+   "livableArea": 29,
+   "landArea": null,
+   "postalCode": "3001",
+   "geoLat": 50.86685,
+   "geoLong": 4.69576,
+   "pictures": [
+    {
+     "id": "202a2bb7-4065-404e-943b-55f0304679d1",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/202a2bb7-4065-404e-943b-55f0304679d1.jpg",
+     "name": null,
+     "ordinal": 1,
+     "isPrivate": false
+    },
+    {
+     "id": "4efd2ddb-d61a-40dd-b08e-03a5deb29098",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/4efd2ddb-d61a-40dd-b08e-03a5deb29098.jpg",
+     "name": null,
+     "ordinal": 2,
+     "isPrivate": false
+    },
+    {
+     "id": "bbb105ca-f120-4b94-bf7f-4cdf7cec01b2",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/bbb105ca-f120-4b94-bf7f-4cdf7cec01b2.jpg",
+     "name": null,
+     "ordinal": 3,
+     "isPrivate": false
+    },
+    {
+     "id": "955267cd-0035-4d4a-97a1-d42a511d3d45",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/955267cd-0035-4d4a-97a1-d42a511d3d45.jpg",
+     "name": null,
+     "ordinal": 4,
+     "isPrivate": false
+    },
+    {
+     "id": "7c52db3a-07f1-4cc7-a9aa-a716393fbcac",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/7c52db3a-07f1-4cc7-a9aa-a716393fbcac.jpg",
+     "name": null,
+     "ordinal": 5,
+     "isPrivate": false
+    },
+    {
+     "id": "255a1d8c-9047-4286-b2e8-f73cd9b4c358",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/255a1d8c-9047-4286-b2e8-f73cd9b4c358.jpg",
+     "name": null,
+     "ordinal": 6,
+     "isPrivate": false
+    },
+    {
+     "id": "c162fd52-02cf-4f1d-84e8-4c795ec63718",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/c162fd52-02cf-4f1d-84e8-4c795ec63718.jpg",
+     "name": null,
+     "ordinal": 7,
+     "isPrivate": false
+    },
+    {
+     "id": "8ae047cf-d3ff-468f-8181-d4dc12f94e71",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/8ae047cf-d3ff-468f-8181-d4dc12f94e71.jpg",
+     "name": null,
+     "ordinal": 8,
+     "isPrivate": false
+    },
+    {
+     "id": "084dad8c-2207-4f05-8b56-9b89ebae61db",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/084dad8c-2207-4f05-8b56-9b89ebae61db.jpg",
+     "name": null,
+     "ordinal": 9,
+     "isPrivate": false
+    }
+   ],
+   "status": "available",
+   "generalCondition": "good",
+   "updatedAt": "2026-06-08T12:25:41.752Z",
+   "estateOfTheMonth": false,
+   "energyScore": "c",
+   "totalCount": "31"
+  },
+  {
+   "id": 142482,
+   "name": "MARAVIL 0105",
+   "category": "apartment",
+   "country": "be",
+   "type": {
+    "en": "studio",
+    "fr": "studio",
+    "nl": "studio"
+   },
+   "city": "Leuven",
+   "transactionType": "for-sale",
+   "hasAdvertisedPricePublic": true,
+   "isBidding": false,
+   "priceAsAdvertised": 279000,
+   "priceForMonthlyAnnuity": null,
+   "highlightStatus": null,
+   "rooms": null,
+   "bedroomCount": 1,
+   "livableArea": 26,
+   "landArea": null,
+   "postalCode": "3000",
+   "geoLat": 50.88054,
+   "geoLong": 4.70552,
+   "pictures": [
+    {
+     "id": "7d144b00-c9bb-41e2-8a00-d3f6e62bfd95",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/7d144b00-c9bb-41e2-8a00-d3f6e62bfd95.jpg",
+     "name": null,
+     "ordinal": 1,
+     "isPrivate": false
+    },
+    {
+     "id": "d2d5d295-53bb-4598-adc8-24b1c5d646d4",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/d2d5d295-53bb-4598-adc8-24b1c5d646d4.jpg",
+     "name": null,
+     "ordinal": 2,
+     "isPrivate": false
+    },
+    {
+     "id": "7584e2f5-cbd4-4553-97ec-f199fed20a89",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/7584e2f5-cbd4-4553-97ec-f199fed20a89.jpg",
+     "name": null,
+     "ordinal": 3,
+     "isPrivate": false
+    },
+    {
+     "id": "2230f9a4-cc3d-42bb-951a-a931f1df6dc5",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/2230f9a4-cc3d-42bb-951a-a931f1df6dc5.jpg",
+     "name": null,
+     "ordinal": 4,
+     "isPrivate": false
+    },
+    {
+     "id": "48838790-33d0-4864-b95d-d4e13e510a42",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/48838790-33d0-4864-b95d-d4e13e510a42.jpg",
+     "name": null,
+     "ordinal": 5,
+     "isPrivate": false
+    },
+    {
+     "id": "cc85a0df-f929-41df-ba0e-974b5e5b63df",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/cc85a0df-f929-41df-ba0e-974b5e5b63df.jpg",
+     "name": null,
+     "ordinal": 6,
+     "isPrivate": false
+    },
+    {
+     "id": "5c3bfec8-99ea-4754-aa15-6f26b8728c0a",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/5c3bfec8-99ea-4754-aa15-6f26b8728c0a.jpg",
+     "name": null,
+     "ordinal": 7,
+     "isPrivate": false
+    },
+    {
+     "id": "2e11bd0f-a34a-41bc-acfd-9febe50aafc7",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/2e11bd0f-a34a-41bc-acfd-9febe50aafc7.jpg",
+     "name": null,
+     "ordinal": 8,
+     "isPrivate": false
+    },
+    {
+     "id": "79b88a0e-1c49-4c42-8ea2-9dffe97fff1b",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/79b88a0e-1c49-4c42-8ea2-9dffe97fff1b.jpg",
+     "name": null,
+     "ordinal": 9,
+     "isPrivate": false
+    }
+   ],
+   "status": "available",
+   "generalCondition": "good",
+   "updatedAt": "2026-02-04T17:37:39.869Z",
+   "estateOfTheMonth": false,
+   "energyScore": "b",
+   "totalCount": "31"
+  },
+  {
+   "id": 142816,
+   "name": "Riddersstraat 268 bus 005 - 3000 Leuven",
+   "category": "apartment",
+   "country": "be",
+   "type": {
+    "en": "studio",
+    "fr": "studio",
+    "nl": "studio"
+   },
+   "city": "Leuven",
+   "transactionType": "for-sale",
+   "hasAdvertisedPricePublic": true,
+   "isBidding": false,
+   "priceAsAdvertised": 270000,
+   "priceForMonthlyAnnuity": null,
+   "highlightStatus": null,
+   "rooms": null,
+   "bedroomCount": 1,
+   "livableArea": 40,
+   "landArea": null,
+   "postalCode": "3000",
+   "geoLat": 50.88698,
+   "geoLong": 4.69581,
+   "pictures": [
+    {
+     "id": "615fb26e-baaa-490c-b2ea-6ebbea2d6517",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/615fb26e-baaa-490c-b2ea-6ebbea2d6517.jpg",
+     "name": null,
+     "ordinal": 1,
+     "isPrivate": false
+    },
+    {
+     "id": "b3414dec-6392-459c-bd24-63c20cbe395e",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/b3414dec-6392-459c-bd24-63c20cbe395e.jpg",
+     "name": null,
+     "ordinal": 2,
+     "isPrivate": false
+    },
+    {
+     "id": "e218faab-deb3-4af4-a1cc-15f54b75309d",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/e218faab-deb3-4af4-a1cc-15f54b75309d.jpg",
+     "name": null,
+     "ordinal": 3,
+     "isPrivate": false
+    },
+    {
+     "id": "f5df498a-27f8-431d-8c39-6399363f478a",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/f5df498a-27f8-431d-8c39-6399363f478a.jpg",
+     "name": null,
+     "ordinal": 4,
+     "isPrivate": false
+    },
+    {
+     "id": "dba23aa8-4c9a-4b69-9905-763c2d5fa89e",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/dba23aa8-4c9a-4b69-9905-763c2d5fa89e.jpg",
+     "name": null,
+     "ordinal": 5,
+     "isPrivate": false
+    },
+    {
+     "id": "3c9f74e4-67e1-4a33-a229-4aa072610508",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/3c9f74e4-67e1-4a33-a229-4aa072610508.jpg",
+     "name": null,
+     "ordinal": 6,
+     "isPrivate": false
+    },
+    {
+     "id": "09491df0-3c71-40b7-90ec-c0430f74667e",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/09491df0-3c71-40b7-90ec-c0430f74667e.jpg",
+     "name": null,
+     "ordinal": 7,
+     "isPrivate": false
+    },
+    {
+     "id": "d44fa3cb-66ac-41e1-b3b9-a4993ea67437",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/d44fa3cb-66ac-41e1-b3b9-a4993ea67437.jpg",
+     "name": null,
+     "ordinal": 8,
+     "isPrivate": false
+    },
+    {
+     "id": "4c6daea5-34b3-4d5a-8ae1-94104e8812df",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/4c6daea5-34b3-4d5a-8ae1-94104e8812df.jpg",
+     "name": null,
+     "ordinal": 9,
+     "isPrivate": false
+    },
+    {
+     "id": "9cb014d0-2d55-4888-83fd-803c4ce21b66",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/9cb014d0-2d55-4888-83fd-803c4ce21b66.jpg",
+     "name": null,
+     "ordinal": 10,
+     "isPrivate": false
+    }
+   ],
+   "status": "available",
+   "generalCondition": "as_new",
+   "updatedAt": "2025-11-21T17:40:59.248Z",
+   "estateOfTheMonth": false,
+   "energyScore": "a",
+   "totalCount": "31"
+  },
+  {
+   "id": 146564,
+   "name": "Residentie Woods - kamer 0015",
+   "category": "apartment",
+   "country": "be",
+   "type": {
+    "en": "student room",
+    "fr": "chambre \u00e9tudiant",
+    "nl": "studentenkamer"
+   },
+   "city": "Leuven",
+   "transactionType": "for-sale",
+   "hasAdvertisedPricePublic": true,
+   "isBidding": false,
+   "priceAsAdvertised": 193000,
+   "priceForMonthlyAnnuity": null,
+   "highlightStatus": null,
+   "rooms": null,
+   "bedroomCount": 1,
+   "livableArea": 21,
+   "landArea": null,
+   "postalCode": "3010",
+   "geoLat": 50.87359,
+   "geoLong": 4.71941,
+   "pictures": [
+    {
+     "id": "12c23ee6-d0b6-4ef4-b812-53500c406e05",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/12c23ee6-d0b6-4ef4-b812-53500c406e05.jpg",
+     "name": null,
+     "ordinal": 1,
+     "isPrivate": false
+    },
+    {
+     "id": "90338efa-84e5-467e-814a-39cd18f5790e",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/90338efa-84e5-467e-814a-39cd18f5790e.jpg",
+     "name": null,
+     "ordinal": 2,
+     "isPrivate": false
+    },
+    {
+     "id": "b6465762-38cc-46e1-8296-3d3201fd8674",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/b6465762-38cc-46e1-8296-3d3201fd8674.jpg",
+     "name": null,
+     "ordinal": 3,
+     "isPrivate": false
+    },
+    {
+     "id": "6a1cd004-ae8a-4fb0-adcc-def09dea78ce",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/6a1cd004-ae8a-4fb0-adcc-def09dea78ce.jpg",
+     "name": null,
+     "ordinal": 4,
+     "isPrivate": false
+    },
+    {
+     "id": "2d5ebbdb-5cf2-4491-9ab3-64f75b3094f0",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/2d5ebbdb-5cf2-4491-9ab3-64f75b3094f0.jpg",
+     "name": null,
+     "ordinal": 5,
+     "isPrivate": false
+    },
+    {
+     "id": "1ee3c302-bd3a-4302-94a1-901f720535bd",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/1ee3c302-bd3a-4302-94a1-901f720535bd.jpg",
+     "name": null,
+     "ordinal": 6,
+     "isPrivate": false
+    },
+    {
+     "id": "5d3c5179-4a40-46aa-810f-196a7f64cf32",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/5d3c5179-4a40-46aa-810f-196a7f64cf32.jpg",
+     "name": null,
+     "ordinal": 7,
+     "isPrivate": false
+    },
+    {
+     "id": "b6b8f523-de1d-4a4b-a45b-bbc68bfa016c",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/b6b8f523-de1d-4a4b-a45b-bbc68bfa016c.jpg",
+     "name": null,
+     "ordinal": 8,
+     "isPrivate": false
+    },
+    {
+     "id": "a951ff29-73bc-4995-aa75-3b2bb02eb5aa",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/a951ff29-73bc-4995-aa75-3b2bb02eb5aa.jpg",
+     "name": null,
+     "ordinal": 9,
+     "isPrivate": false
+    },
+    {
+     "id": "e929c30d-39de-4c6f-8193-a4d996c97dd9",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/e929c30d-39de-4c6f-8193-a4d996c97dd9.jpg",
+     "name": null,
+     "ordinal": 10,
+     "isPrivate": false
+    },
+    {
+     "id": "f7ef6743-961c-4c8e-bc07-5c829574dbd6",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/f7ef6743-961c-4c8e-bc07-5c829574dbd6.jpg",
+     "name": null,
+     "ordinal": 11,
+     "isPrivate": false
+    },
+    {
+     "id": "b912971d-2b25-4e4c-8b53-2461e9df2fd5",
+     "url": "https://asgard-odin.s3.eu-west-3.amazonaws.com/production/public/picture/b912971d-2b25-4e4c-8b53-2461e9df2fd5.jpg",
+     "name": null,
+     "ordinal": 12,
+     "isPrivate": false
+    }
+   ],
+   "status": "available",
+   "generalCondition": "as_new",
+   "updatedAt": "2026-01-05T16:02:37.308Z",
+   "estateOfTheMonth": false,
+   "energyScore": "a",
+   "totalCount": "31"
+  }
+ ],
+ "meta": {
+  "pagination": {
+   "total": 31,
+   "limit": 5,
+   "start": 0
+  }
+ }
+}
