@@ -1,4 +1,5 @@
 import logging
+import re
 import tempfile
 import time
 from contextlib import contextmanager
@@ -7,7 +8,7 @@ from time import sleep
 from typing import Optional, Callable, Generator, Any
 
 import requests
-import undetected_chromedriver as uc
+import undetected_chromedriver as uc  # type: ignore[import-untyped]
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
@@ -26,6 +27,17 @@ REQUEST_HEADERS = {
     "Accept-Language": "en-US,en;q=0.9,nl;q=0.8",
 }
 REQUEST_TIMEOUT = 30
+
+
+def within_budget(display_price: str, max_price: int) -> bool:
+    """Client-side price cap for sites without a server-side price filter.
+
+    Prices that carry no digits at all (e.g. 'prijs op aanvraag') are kept,
+    as they cannot be compared against the budget."""
+    digits = re.sub(r"\D", "", display_price)
+    if not digits:
+        return True
+    return int(digits) <= max_price
 
 
 @retry(

@@ -31,6 +31,11 @@ types-requests = "^2.33.0.20260518"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.pytest.ini_options]
+markers = [
+    "integration: browser-based tests that need a local Chrome installation",
+]
+
 [tool.mypy]
 plugins = "pydantic.mypy"
 packages = "huisvinder"

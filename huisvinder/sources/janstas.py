@@ -24,7 +24,7 @@ class JanStas(BaseSource):
             bedrooms = living_area = None
             link_tag = prop.find("a", href=True)
             if link_tag:
-                link = urljoin("https://immojanstas.be/", link_tag["href"])
+                link = urljoin("https://immojanstas.be/", str(link_tag["href"]))
             else:
                 continue
 

@@ -1,25 +1,54 @@
-import logging
-from pathlib import Path
+import pytest
 
-import undetected_chromedriver as uc  # type: ignore[import-untyped]
-
+from huisvinder.sources.bvm_vastgoed import BVMVastgoed
 from huisvinder.sources.century_21 import Century21
+from huisvinder.sources.covas import CovasImmo
+from huisvinder.sources.immo_horst import ImmoHorst
+from huisvinder.sources.immo_ruelens import ImmoRuelens
+from huisvinder.sources.immo_time import ImmoTime
 from huisvinder.sources.immodedijle import DeDijle
+from huisvinder.sources.immolight import Immolight
 from huisvinder.sources.immovlan import Immovlan
 from huisvinder.sources.immoweb import Immoweb
 from huisvinder.sources.janstas import JanStas
+from huisvinder.sources.marnix_vastgoed import MarnixVastgoed
+from huisvinder.sources.realium import Realium
+from huisvinder.sources.ter_duin import ImmoTerDuin
+from huisvinder.sources.your_house import YourHouseVastgoed
 
-logger = logging.getLogger(__name__)
-PAGE_SOURCE_PATH = Path(__file__).parents[1] / "tests" / "sources"
+# Static-fetch sources expected to always have at least one active listing.
+# (ImmoWonen and DeImmoMakelaar are excluded: their active stock within
+# budget is currently empty, so an empty result is not a failure.)
+STATIC_SOURCES = [
+    Century21,
+    DeDijle,
+    JanStas,
+    BVMVastgoed,
+    Immolight,
+    ImmoHorst,
+    MarnixVastgoed,
+    CovasImmo,
+    YourHouseVastgoed,
+    ImmoTerDuin,
+    Realium,
+    ImmoTime,
+    ImmoRuelens,
+]
 
 
-def test_century() -> None:
-    century_21 = Century21()
-    urls = century_21._get_page_urls()
-    base_houses = century_21._get_page_data(urls[0])
-    assert base_houses
+@pytest.mark.parametrize("source_class", STATIC_SOURCES)
+def test_static_source(source_class) -> None:
+    source = source_class()
+    urls = source._get_page_urls()
+    sources = []
+    for url in urls[:3]:
+        base_houses = source._get_page_data(url)
+        sources.extend(base_houses)
+    assert sources
+    assert all(house.link for house in sources)
 
 
+@pytest.mark.integration
 def test_immoweb() -> None:
     immoweb = Immoweb()
     urls = immoweb._get_page_urls()
@@ -30,31 +59,12 @@ def test_immoweb() -> None:
     assert sources
 
 
+@pytest.mark.integration
 def test_immovlan() -> None:
     immovlan = Immovlan()
     urls = immovlan._get_page_urls()
     sources = []
     for url in urls[:3]:
         base_houses = immovlan._get_page_data(url)
-        sources.extend(base_houses)
-    assert sources
-
-
-def test_immodedijle() -> None:
-    dedijle = DeDijle()
-    urls = dedijle._get_page_urls()
-    sources = []
-    for url in urls[:3]:
-        base_houses = dedijle._get_page_data(url)
-        sources.extend(base_houses)
-    assert sources
-
-
-def test_janstas() -> None:
-    janstas = JanStas()
-    urls = janstas._get_page_urls()
-    sources = []
-    for url in urls[:3]:
-        base_houses = janstas._get_page_data(url)
         sources.extend(base_houses)
     assert sources

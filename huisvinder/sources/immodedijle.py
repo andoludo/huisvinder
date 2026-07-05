@@ -1,7 +1,9 @@
 import datetime
 import re
-from typing import List
+from typing import List, Optional
 from urllib.parse import urljoin
+
+from bs4 import Tag
 
 from huisvinder.models import BaseSource, BaseHouse
 from huisvinder.utils import get_static_soup
@@ -19,6 +21,21 @@ class DeDijle(BaseSource):
             self.base_url,
         ]
 
+    @staticmethod
+    def _get_features(prop: Tag) -> tuple[Optional[str], Optional[str]]:
+        # The feature list renders as plain text items: bedrooms, bathrooms,
+        # area (icons are injected by JavaScript, absent from static HTML).
+        bedrooms = living_area = None
+        for li in prop.select(".estate_properties li.estate_property"):
+            text = li.get_text(strip=True)
+            sqm_match = re.search(r"(\d+)\s*m", text)
+
+            if sqm_match:
+                living_area = str(sqm_match.group(1))
+            elif text.isdigit() and bedrooms is None:
+                bedrooms = text
+        return bedrooms, living_area
+
     def _get_page_data(self, page_url: str) -> List[BaseHouse]:
         soup = get_static_soup(page_url)
         properties = soup.find_all("div", class_="col-12 col-md-6 col-lg-4")
@@ -26,10 +43,10 @@ class DeDijle(BaseSource):
         results = []
 
         for prop in properties:
-            link = category = price = bedrooms = living_area = locality = None
+            link = category = price = locality = None
             link_tag = prop.select_one(".estate-info a[href]")
             if link_tag:
-                link = urljoin("https://immodedijle.be/", link_tag["href"])
+                link = urljoin("https://immodedijle.be/", str(link_tag["href"]))
             if link is None:
                 continue
             category_tag = prop.select_one(".estate-info-title h3")
@@ -46,16 +63,7 @@ class DeDijle(BaseSource):
             if loc_tag:
                 locality = loc_tag.get_text(strip=True)
 
-            # The feature list renders as plain text items: bedrooms, bathrooms,
-            # area (icons are injected by JavaScript, absent from static HTML).
-            for li in prop.select(".estate_properties li.estate_property"):
-                text = li.get_text(strip=True)
-                sqm_match = re.search(r"(\d+)\s*m", text)
-
-                if sqm_match:
-                    living_area = str(sqm_match.group(1))
-                elif text.isdigit() and bedrooms is None:
-                    bedrooms = text
+            bedrooms, living_area = self._get_features(prop)
 
             results.append(
                 {
