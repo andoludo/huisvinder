@@ -1,30 +1,27 @@
 import logging
+import os
 import re
-import tempfile
-import time
-from contextlib import contextmanager
-from pathlib import Path
+from functools import lru_cache
 from time import sleep
 from typing import Any
-from collections.abc import Callable, Generator
 
-import requests
-import undetected_chromedriver as uc  # type: ignore[import-untyped] # no stubs shipped
+import httpx
 from bs4 import BeautifulSoup
-from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.wait import WebDriverWait
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 logger = logging.getLogger(__name__)
 
 REQUEST_HEADERS = {
-    "User-Agent": ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+        " (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9,nl;q=0.8",
 }
 REQUEST_TIMEOUT = 30
+REQUEST_DELAY_ENV = "HUISVINDER_REQUEST_DELAY"
+DEFAULT_REQUEST_DELAY = 0.5
 
 
 def within_budget(display_price: str, max_price: int) -> bool:
@@ -38,93 +35,40 @@ def within_budget(display_price: str, max_price: int) -> bool:
     return int(digits) <= max_price
 
 
+def request_delay() -> float:
+    """Seconds slept before each request; override via HUISVINDER_REQUEST_DELAY."""
+    return float(os.environ.get(REQUEST_DELAY_ENV, DEFAULT_REQUEST_DELAY))
+
+
+@lru_cache(maxsize=1)
+def _http_client() -> httpx.Client:
+    # HTTP/2 matters: some sites (immoweb) reject plain HTTP/1.1 clients
+    return httpx.Client(
+        http2=True,
+        headers=REQUEST_HEADERS,
+        timeout=REQUEST_TIMEOUT,
+        follow_redirects=True,
+    )
+
+
 @retry(
     reraise=True,
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=0.5, min=0.5, max=8.0),
 )
-def get_static_soup(url: str) -> BeautifulSoup:
-    """Fetch a server-rendered page over plain HTTP and parse it.
-
-    Much more robust than driving a browser for sites that do not require
-    JavaScript to render their listings."""
-    response = requests.get(url, headers=REQUEST_HEADERS, timeout=REQUEST_TIMEOUT)
+def _fetch(url: str) -> httpx.Response:
+    sleep(request_delay())
+    logger.debug("GET %s", url)
+    response = _http_client().get(url)
     response.raise_for_status()
-    return BeautifulSoup(response.text, "html.parser")
+    return response
 
 
-@contextmanager
-def web_browser(
-    url: str,
-    load_strategy_none: bool = False,
-    headless: bool = False,
-    callback: Callable[[WebDriver], None] | None = None,
-) -> Generator[WebDriver, Any, None]:
-    browser = uc.Chrome(headless=headless, use_subprocess=False)
-    browser.set_page_load_timeout(30)
-
-    try:
-        browser.get(url)
-        sleep(30)
-    except Exception:
-        browser.execute_script("window.stop();")
-    if callback:
-        sleep(10)
-        callback(browser)
-    sleep(2)
-    yield browser
-    browser.quit()
+def get_static_soup(url: str) -> BeautifulSoup:
+    """Fetch a server-rendered page over plain HTTP and parse it."""
+    return BeautifulSoup(_fetch(url).text, "html.parser")
 
 
-@contextmanager
-def soup_page(browser: WebDriver) -> Generator[BeautifulSoup, Any, None]:
-    with tempfile.NamedTemporaryFile(suffix=".html", delete=True) as page:
-        page_source_code = browser.page_source.encode("utf-8")
-        Path(page.name).write_bytes(page_source_code)
-        yield BeautifulSoup(page, "html.parser")
-
-
-@contextmanager
-def temporary_web_page(
-    url: str,
-    load_strategy_none: bool = False,
-    headless: bool = False,
-    callback: Callable[[WebDriver], None] | None = None,
-) -> Generator[BeautifulSoup, Any, None]:
-    with web_browser(url, load_strategy_none, headless, callback=callback) as browser, soup_page(browser) as soup:
-        yield soup
-        browser.quit()
-
-
-def find_cookie_banner(browser: WebDriver, xpath: str, iframe: str | None = None) -> None:
-    if iframe is None:
-        try:
-            button = browser.find_element(By.XPATH, xpath)
-            if button:
-                time.sleep(5)
-                button.click()
-        except Exception as e:
-            logger.warning(f"Cookie banner: {e}")
-    else:
-        try:
-            WebDriverWait(browser, 10).until(
-                expected_conditions.frame_to_be_available_and_switch_to_it((By.XPATH, iframe))
-            )
-            WebDriverWait(browser, 10).until(expected_conditions.element_to_be_clickable((By.XPATH, xpath))).click()
-            browser.switch_to.default_content()
-        except Exception as e:
-            logger.warning(f"Cookie banner: {e}")
-
-
-def scroll_to_bottom(driver: WebDriver, pause_time: int = 2) -> None:
-    last_height = driver.execute_script("return document.body.scrollHeight")
-
-    while True:
-        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(pause_time)
-        new_height = driver.execute_script("return document.body.scrollHeight")
-
-        if new_height == last_height:
-            break
-
-        last_height = new_height
+def get_json(url: str) -> Any:
+    """Fetch a JSON endpoint with the same politeness and retry policy."""
+    return _fetch(url).json()

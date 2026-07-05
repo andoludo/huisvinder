@@ -13,6 +13,7 @@ from huisvinder.sources.immo_ruelens import ImmoRuelens
 from huisvinder.sources.immo_time import ImmoTime
 from huisvinder.sources.immodedijle import DeDijle
 from huisvinder.sources.immolight import Immolight
+from huisvinder.sources.immovlan import Immovlan
 from huisvinder.sources.immoweb import Immoweb
 from huisvinder.sources.janstas import JanStas
 from huisvinder.sources.marnix_vastgoed import MarnixVastgoed
@@ -42,6 +43,7 @@ LIVE_SOURCES = [
     WeInvest,
     ERAVandendries,
     Immoweb,
+    Immovlan,
 ]
 
 

@@ -1,101 +1,66 @@
 import datetime
-import time
-
-from pydantic import BaseModel
-from selenium.webdriver.chrome.webdriver import WebDriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions
-from selenium.webdriver.support.wait import WebDriverWait
-from tenacity import stop_after_attempt, retry, wait_exponential
-from undetected_chromedriver import WebElement  # type: ignore
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import web_browser
+from huisvinder.utils import get_json
 from huisvinder.types import Sources
 
-
-class Selector(BaseModel):
-    selector: str
-    attribute: str | None = None
-    name: str
+MAX_PRICE = 400000
 
 
-def remove_banner(browser: WebDriver) -> None:
-    host = WebDriverWait(browser, 60).until(
-        expected_conditions.presence_of_element_located((By.CSS_SELECTOR, "#usercentrics-root"))
-    )
-    for _ in range(60):  # 10 checks per second
-        shadow = browser.execute_script("return arguments[0].shadowRoot", host)
-        if shadow is not None:
-            break
-        time.sleep(1)
-    if shadow is None:
-        raise Exception("No shadow found")
-    ok_button = shadow.find_element(
-        By.CSS_SELECTOR,
-        "#uc-center-container > div.sc-eBMEME.ixkACg > div > div.sc-jsJBEP.jnQAFK > div > button.sc-dcJsrY.liDFoy",
-    )
-    ok_button.click()
-
-
-def _get_data(item: WebElement, css_selector: str, attribute: str | None = None) -> str | None:
-    try:
-        if attribute:
-            return item.find_element(By.CSS_SELECTOR, css_selector).get_attribute(  # type: ignore
-                attribute
-            )
-        return item.find_element(By.CSS_SELECTOR, css_selector).text  # type: ignore
-    except Exception:
+def _as_str(value: object) -> str | None:
+    if value in (None, ""):
         return None
-
-
-SELECTORS = [
-    Selector(name="link", attribute="href", selector="article a"),
-    Selector(name="display_price", selector=".card--result__price .resizable-text"),
-    Selector(name="city", selector=".card__information.card--results__information--locality"),
-    Selector(name="description", selector=".card--result__description"),
-    Selector(
-        name="bedrooms",
-        selector=(
-            ".card__information.card--result__information.card__information--property"
-            " > span:nth-child(1) > span:nth-child(1)"
-        ),
-    ),
-]
+    return str(value)
 
 
 class Immoweb(BaseSource):
+    """Immoweb renders its search results from a JSON endpoint; query it
+    directly instead of driving a browser."""
+
     name: Sources = "Immoweb"
     base_url: str = (
-        "https://www.immoweb.be/en/search/house-and-apartment/for-sale?buildingConditions=GOOD,JUST_RENOVATED,"
-        "TO_RENOVATE&countries=BE&epcScores=E,D,C,F,B,A&maxPrice=400000&minBedroomCount=2&postalCodes="
-        "BE-3001,3000&page=1&orderBy=relevance"
+        "https://www.immoweb.be/en/search-results/house-and-apartment/for-sale"
+        f"?countries=BE&maxPrice={MAX_PRICE}&minBedroomCount=2"
+        "&postalCodes=BE-3001,3000&orderBy=relevance"
     )
 
     def _get_page_urls(self) -> list[str]:
-        max_page = 15
-        return [
-            self.base_url,
-            *[self.base_url.replace("&page=1&", f"&page={page_number}&") for page_number in range(2, max_page + 1)],
-        ]
+        max_page = 5  # 30 results per page
+        return [f"{self.base_url}&page={page_number}" for page_number in range(1, max_page + 1)]
 
-    @retry(
-        reraise=True,  # re-raise final exception after retries
-        stop=stop_after_attempt(3),  # max 5 attempts
-        wait=wait_exponential(multiplier=0.5, min=0.5, max=8.0),
-    )
     def _get_page_data(self, page_url: str) -> list[BaseHouse]:
-        with web_browser(page_url, headless=False, callback=remove_banner) as browser:
-            items = browser.find_elements(By.CSS_SELECTOR, "li.search-results__item")
-            results = []
-            for item in items:
-                search_result = {
+        payload = get_json(page_url)
+        results = []
+        for result in payload.get("results", []):
+            classified_id = result.get("id")
+            property_ = result.get("property") or {}
+            location = property_.get("location") or {}
+            locality = location.get("locality")
+            postal_code = location.get("postalCode")
+            property_type = (property_.get("type") or "").lower()
+            if not classified_id or not locality or not property_type:
+                continue
+            link = (
+                f"https://www.immoweb.be/en/classified/{property_type}/for-sale"
+                f"/{locality.lower()}/{postal_code}/{classified_id}"
+            )
+
+            sale = (result.get("transaction") or {}).get("sale") or {}
+            price = sale.get("price")
+            display_price = f"€ {price:,.0f}".replace(",", ".") if price else None
+
+            results.append(
+                {
                     "source": self.name,
                     "created_at": datetime.date.today(),
+                    "link": link,
+                    "category": property_type.capitalize(),
+                    "city": locality,
+                    "display_price": display_price,
+                    "description": _as_str(property_.get("title")),
+                    "bedrooms": _as_str(property_.get("bedroomCount")),
+                    "living_area": _as_str(property_.get("netHabitableSurface")),
+                    "surface_ground": _as_str(property_.get("landSurface")),
                 }
-                for selector in SELECTORS:
-                    value = _get_data(item, selector.selector, selector.attribute)
-                    search_result.update({selector.name: value})  # type: ignore
-                if search_result.get("link"):
-                    results.append(search_result)
-            return [BaseHouse.model_validate(r) for r in results]
+            )
+        return [BaseHouse.model_validate(r) for r in results]

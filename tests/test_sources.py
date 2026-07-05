@@ -9,7 +9,6 @@ from bs4 import BeautifulSoup
 
 from conftest import (
     EMPTY_HTML,
-    FakeJsonResponse,
     load_fixture_json,
     load_fixture_soup,
 )
@@ -322,6 +321,36 @@ CASES = [
             "bedrooms": "3",
         },
     ),
+    SourceCase(
+        Immoweb,
+        "huisvinder.sources.immoweb",
+        "immoweb.json",
+        cards_in_fixture=3,
+        expected_count=3,
+        n_page_urls=5,
+        json_based=True,
+        first={
+            "link": "https://www.immoweb.be/en/classified/apartment/for-sale/heverlee/3001/21685566",
+            "display_price": "€ 317.000",
+            "city": "Heverlee",
+            "category": "Apartment",
+            "bedrooms": "2",
+            "living_area": "75",
+        },
+    ),
+    SourceCase(
+        Immovlan,
+        "huisvinder.sources.immovlan",
+        "immovlan.html",
+        cards_in_fixture=8,  # one teaser article without link/price is skipped
+        expected_count=7,
+        n_page_urls=15,
+        first={
+            "display_price": "294\u202f900 € - 349\u202f900 €",
+            "city": "3300 Tienen",
+            "bedrooms": None,
+        },
+    ),
 ]
 
 CASE_IDS = [case.id for case in CASES]
@@ -330,8 +359,7 @@ CASE_IDS = [case.id for case in CASES]
 def parse_fixture(case: SourceCase) -> list[BaseHouse]:
     source = case.source_class()
     if case.json_based:
-        payload = load_fixture_json(case.fixture)
-        with patch(f"{case.module}.requests.get", return_value=FakeJsonResponse(payload)):
+        with patch(f"{case.module}.get_json", return_value=load_fixture_json(case.fixture)):
             return source._get_page_data("http://fixture.test/")
     with patch(f"{case.module}.get_static_soup", return_value=load_fixture_soup(case.fixture)):
         return source._get_page_data("http://fixture.test/")
@@ -360,8 +388,8 @@ def test_unavailable_listings_are_dropped(case):
 def test_empty_page_yields_no_houses(case):
     source = case.source_class()
     if case.json_based:
-        empty: dict[str, list[object]] = {"data": [], "Publications": []}
-        with patch(f"{case.module}.requests.get", return_value=FakeJsonResponse(empty)):
+        empty: dict[str, list[object]] = {"data": [], "Publications": [], "results": []}
+        with patch(f"{case.module}.get_json", return_value=empty):
             houses = source._get_page_data("http://fixture.test/")
     else:
         soup = BeautifulSoup(EMPTY_HTML, "html.parser")
@@ -395,11 +423,6 @@ def test_era_pages_are_zero_based():
     urls = ERAVandendries()._get_page_urls()
     assert urls[0].endswith("page=0")
     assert urls[-1].endswith("page=7")
-
-
-def test_browser_sources_page_urls():
-    assert len(Immoweb()._get_page_urls()) == 15
-    assert len(Immovlan()._get_page_urls()) == 15
 
 
 @pytest.mark.parametrize(

@@ -1,10 +1,8 @@
 import datetime
 from typing import Any
 
-import requests
-
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import REQUEST_HEADERS, REQUEST_TIMEOUT
+from huisvinder.utils import get_json
 from huisvinder.types import Sources
 
 MAX_PRICE = 400000
@@ -36,9 +34,7 @@ class WeInvest(BaseSource):
         return [f"{self.base_url}&pagination%5Boffset%5D={page_number * PAGE_SIZE}" for page_number in range(max_page)]
 
     def _get_page_data(self, page_url: str) -> list[BaseHouse]:
-        response = requests.get(page_url, headers=REQUEST_HEADERS, timeout=REQUEST_TIMEOUT)
-        response.raise_for_status()
-        properties = response.json().get("data", [])
+        properties = get_json(page_url).get("data", [])
 
         results = []
         for property_ in properties:

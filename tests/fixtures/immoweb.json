@@ -1,0 +1,352 @@
+{
+ "criteria": {
+  "countries": "BE",
+  "maxPrice": 400000,
+  "minBedroomCount": 2,
+  "postalCodes": [
+   {
+    "queryValue": "3000",
+    "queryParam": "postalCodes",
+    "slug": "leuven",
+    "shortLabel": "Leuven (3000)",
+    "label": "Leuven (3000)",
+    "translations": {
+     "fr": "Louvain",
+     "en": "Leuven",
+     "nl": "Leuven"
+    }
+   },
+   {
+    "queryValue": "3001",
+    "queryParam": "postalCodes",
+    "slug": "heverlee",
+    "shortLabel": "Heverlee (3001)",
+    "label": "Heverlee (3001)",
+    "translations": {
+     "fr": "Heverlee",
+     "en": "Heverlee",
+     "nl": "Heverlee"
+    }
+   }
+  ],
+  "propertyTypes": "HOUSE,APARTMENT",
+  "transactionTypes": "FOR_SALE",
+  "page": "1"
+ },
+ "totalItems": 37,
+ "currentPage": 1,
+ "results": [
+  {
+   "id": 21685566,
+   "cluster": {
+    "minPrice": null,
+    "maxPrice": null,
+    "minRoom": null,
+    "maxRoom": null,
+    "minSurface": null,
+    "maxSurface": null,
+    "projectInfo": null,
+    "bedroomRange": "",
+    "surfaceRange": ""
+   },
+   "customerLogoUrl": "https://media.immowebstatic.be/customers/0012p00003gGo6KAAS/logo/ee9d682bf12854665086c9d2ced45d75.jpg",
+   "customerName": "Living Stone Leuven",
+   "flags": {
+    "main": "new",
+    "secondary": [],
+    "percentSold": null
+   },
+   "media": {
+    "pictures": []
+   },
+   "property": {
+    "type": "APARTMENT",
+    "subtype": "APARTMENT",
+    "title": "Two bedroom apartment in Leuven with parking space",
+    "bedroomCount": 2,
+    "location": {
+     "country": "Belgium",
+     "region": "Flanders",
+     "province": "Flemish Brabant",
+     "district": "Leuven",
+     "locality": "Heverlee",
+     "postalCode": "3001",
+     "street": "Tiensesteenweg",
+     "number": "222",
+     "box": "0203",
+     "propertyName": null,
+     "floor": 2,
+     "latitude": 50.8710852,
+     "longitude": 4.7249154,
+     "distance": null,
+     "approximated": null,
+     "regionCode": "FLANDERS",
+     "type": null,
+     "hasSeaView": null,
+     "pointsOfInterest": null,
+     "placeName": null
+    },
+    "netHabitableSurface": 75,
+    "landSurface": null,
+    "roomCount": null
+   },
+   "publication": {
+    "publisherId": null,
+    "visualisationOption": "XL",
+    "detailedPageVisibility": "CLASSIC",
+    "size": "xl",
+    "creationDate": null,
+    "lastModificationDate": "2026-07-02T10:32:10.339Z"
+   },
+   "transaction": {
+    "certificateLogoUrl": null,
+    "certificate": null,
+    "hidePrice": null,
+    "type": "FOR_SALE",
+    "rental": null,
+    "sale": {
+     "lifeAnnuity": null,
+     "hasStartingPrice": null,
+     "oldPrice": null,
+     "price": 317000,
+     "pricePerSqm": null,
+     "publicSale": null,
+     "toBuild": null,
+     "isSubjectToVat": null
+    }
+   },
+   "priceType": null,
+   "price": {
+    "type": "residential_sale",
+    "mainValue": 317000,
+    "alternativeValue": null,
+    "additionalValue": null,
+    "oldValue": null,
+    "minRangeValue": null,
+    "maxRangeValue": null,
+    "mainDisplayPrice": "\u20ac317,000",
+    "HTMLDisplayPrice": "<span aria-hidden=\"true\">\u20ac317,000</span>",
+    "alternativeDisplayPrice": "",
+    "oldDisplayPrice": null,
+    "shortDisplayPrice": "\u20ac317K",
+    "accessibilityPrice": "317000\u20ac",
+    "label": "Price",
+    "date": null,
+    "language": "en"
+   },
+   "isBookmarked": false,
+   "has360Tour": null,
+   "hasVirtualTour": null,
+   "hasVideo": null,
+   "advertisementId": null
+  },
+  {
+   "id": 21676112,
+   "cluster": {
+    "minPrice": null,
+    "maxPrice": null,
+    "minRoom": null,
+    "maxRoom": null,
+    "minSurface": null,
+    "maxSurface": null,
+    "projectInfo": null,
+    "bedroomRange": "",
+    "surfaceRange": ""
+   },
+   "customerLogoUrl": "https://media.immowebstatic.be/customers/0012p00002TxsqGAAR/logo/64d6faa09ae7af2534d48aaf96f132db.jpg",
+   "customerName": "Immo Liv'it",
+   "flags": {
+    "main": "under_option",
+    "secondary": [],
+    "percentSold": null
+   },
+   "media": {
+    "pictures": []
+   },
+   "property": {
+    "type": "HOUSE",
+    "subtype": "HOUSE",
+    "title": "Op te frissen stadswoning met koer in Leuven",
+    "bedroomCount": 4,
+    "location": {
+     "country": "Belgium",
+     "region": "Flanders",
+     "province": "Flemish Brabant",
+     "district": "Leuven",
+     "locality": "LEUVEN",
+     "postalCode": "3000",
+     "street": "Kaboutermansstraat",
+     "number": "7",
+     "box": null,
+     "propertyName": "",
+     "floor": null,
+     "latitude": 50.880402,
+     "longitude": 4.688723,
+     "distance": null,
+     "approximated": null,
+     "regionCode": "FLANDERS",
+     "type": null,
+     "hasSeaView": null,
+     "pointsOfInterest": null,
+     "placeName": ""
+    },
+    "netHabitableSurface": 130,
+    "landSurface": 0,
+    "roomCount": null
+   },
+   "publication": {
+    "publisherId": null,
+    "visualisationOption": "XL",
+    "detailedPageVisibility": "CLASSIC",
+    "size": "xl",
+    "creationDate": null,
+    "lastModificationDate": "2026-07-03T01:11:19.696Z"
+   },
+   "transaction": {
+    "certificateLogoUrl": null,
+    "certificate": null,
+    "hidePrice": null,
+    "type": "FOR_SALE",
+    "rental": null,
+    "sale": {
+     "lifeAnnuity": null,
+     "hasStartingPrice": false,
+     "oldPrice": null,
+     "price": 398000,
+     "pricePerSqm": null,
+     "publicSale": null,
+     "toBuild": null,
+     "isSubjectToVat": null
+    }
+   },
+   "priceType": null,
+   "price": {
+    "type": "residential_sale",
+    "mainValue": 398000,
+    "alternativeValue": null,
+    "additionalValue": null,
+    "oldValue": null,
+    "minRangeValue": null,
+    "maxRangeValue": null,
+    "mainDisplayPrice": "\u20ac398,000",
+    "HTMLDisplayPrice": "<span aria-hidden=\"true\">\u20ac398,000</span>",
+    "alternativeDisplayPrice": "",
+    "oldDisplayPrice": null,
+    "shortDisplayPrice": "\u20ac398K",
+    "accessibilityPrice": "398000\u20ac",
+    "label": "Price",
+    "date": null,
+    "language": "en"
+   },
+   "isBookmarked": false,
+   "has360Tour": null,
+   "hasVirtualTour": null,
+   "hasVideo": null,
+   "advertisementId": null
+  },
+  {
+   "id": 21660162,
+   "cluster": {
+    "minPrice": null,
+    "maxPrice": null,
+    "minRoom": null,
+    "maxRoom": null,
+    "minSurface": null,
+    "maxSurface": null,
+    "projectInfo": null,
+    "bedroomRange": "",
+    "surfaceRange": ""
+   },
+   "customerLogoUrl": "https://media.immowebstatic.be/customers/0012p00002TxsqGAAR/logo/64d6faa09ae7af2534d48aaf96f132db.jpg",
+   "customerName": "Immo Liv'it",
+   "flags": {
+    "main": "new",
+    "secondary": [],
+    "percentSold": null
+   },
+   "media": {
+    "pictures": []
+   },
+   "property": {
+    "type": "APARTMENT",
+    "subtype": "APARTMENT",
+    "title": "Ruim duplex-appartement met uitzonderlijk terras in Leuven",
+    "bedroomCount": 2,
+    "location": {
+     "country": "Belgium",
+     "region": "Flanders",
+     "province": "Flemish Brabant",
+     "district": "Leuven",
+     "locality": "LEUVEN",
+     "postalCode": "3000",
+     "street": "Burgemeestersstraat",
+     "number": "38",
+     "box": null,
+     "propertyName": "",
+     "floor": 3,
+     "latitude": 50.8760287,
+     "longitude": 4.711750599999999,
+     "distance": null,
+     "approximated": null,
+     "regionCode": "FLANDERS",
+     "type": null,
+     "hasSeaView": null,
+     "pointsOfInterest": null,
+     "placeName": ""
+    },
+    "netHabitableSurface": 112,
+    "landSurface": null,
+    "roomCount": null
+   },
+   "publication": {
+    "publisherId": null,
+    "visualisationOption": "XL",
+    "detailedPageVisibility": "CLASSIC",
+    "size": "xl",
+    "creationDate": null,
+    "lastModificationDate": "2026-07-01T17:11:57.172Z"
+   },
+   "transaction": {
+    "certificateLogoUrl": null,
+    "certificate": null,
+    "hidePrice": null,
+    "type": "FOR_SALE",
+    "rental": null,
+    "sale": {
+     "lifeAnnuity": null,
+     "hasStartingPrice": false,
+     "oldPrice": null,
+     "price": 345000,
+     "pricePerSqm": null,
+     "publicSale": null,
+     "toBuild": null,
+     "isSubjectToVat": null
+    }
+   },
+   "priceType": null,
+   "price": {
+    "type": "residential_sale",
+    "mainValue": 345000,
+    "alternativeValue": null,
+    "additionalValue": null,
+    "oldValue": null,
+    "minRangeValue": null,
+    "maxRangeValue": null,
+    "mainDisplayPrice": "\u20ac345,000",
+    "HTMLDisplayPrice": "<span aria-hidden=\"true\">\u20ac345,000</span>",
+    "alternativeDisplayPrice": "",
+    "oldDisplayPrice": null,
+    "shortDisplayPrice": "\u20ac345K",
+    "accessibilityPrice": "345000\u20ac",
+    "label": "Price",
+    "date": null,
+    "language": "en"
+   },
+   "isBookmarked": false,
+   "has360Tour": null,
+   "hasVirtualTour": null,
+   "hasVideo": null,
+   "advertisementId": null
+  }
+ ]
+}

@@ -2,10 +2,8 @@ import datetime
 from typing import Any
 from urllib.parse import urljoin
 
-import requests
-
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import REQUEST_HEADERS, REQUEST_TIMEOUT, within_budget
+from huisvinder.utils import get_json, within_budget
 from huisvinder.types import Sources
 
 MAX_PRICE = 400000
@@ -30,9 +28,7 @@ class DeImmoMakelaar(BaseSource):
         ]
 
     def _get_page_data(self, page_url: str) -> list[BaseHouse]:
-        response = requests.get(page_url, headers=REQUEST_HEADERS, timeout=REQUEST_TIMEOUT)
-        response.raise_for_status()
-        publications = response.json().get("Publications", [])
+        publications = get_json(page_url).get("Publications", [])
 
         results = []
         for publication in publications:
