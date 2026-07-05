@@ -18,4 +18,7 @@ Sources = Literal[
     "ImmoTime",
     "ImmoRuelens",
     "DeImmoMakelaar",
+    "ImmoGVE",
+    "WeInvest",
+    "ERAVandendries",
 ]
