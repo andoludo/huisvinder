@@ -31,6 +31,8 @@ class HuisVinderDb(BaseModel):
         self._engine  # noqa: B018 -- touch the cached property to run migrations eagerly
 
     def add_houses(self, houses: list[BaseHouse]) -> None:
+        if not houses:
+            return
         with Session(self._engine) as session:
             houses_ = [h.model_dump() for h in houses]
             stmt = insert(BaseHouseORM).prefix_with("OR REPLACE").values(houses_)

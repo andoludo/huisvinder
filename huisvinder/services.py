@@ -1,6 +1,9 @@
+import logging
+from collections.abc import Sequence
 from pathlib import Path
 
 from huisvinder.database.crud import HuisVinderDb
+from huisvinder.models import BaseHouse, BaseSource
 from huisvinder.sources.bvm_vastgoed import BVMVastgoed
 from huisvinder.sources.century_21 import Century21
 from huisvinder.sources.covas import CovasImmo
@@ -22,37 +25,51 @@ from huisvinder.sources.ter_duin import ImmoTerDuin
 from huisvinder.sources.we_invest import WeInvest
 from huisvinder.sources.your_house import YourHouseVastgoed
 
+logger = logging.getLogger(__name__)
+
+SOURCES: list[type[BaseSource]] = [
+    DeDijle,
+    Immoweb,
+    Immovlan,
+    Century21,
+    JanStas,
+    BVMVastgoed,
+    Immolight,
+    ImmoHorst,
+    MarnixVastgoed,
+    CovasImmo,
+    ImmoWonen,
+    YourHouseVastgoed,
+    ImmoTerDuin,
+    Realium,
+    ImmoTime,
+    ImmoRuelens,
+    DeImmoMakelaar,
+    ImmoGVE,
+    WeInvest,
+    ERAVandendries,
+]
+
+
+def collect_houses(
+    source_classes: Sequence[type[BaseSource]] | None = None,
+) -> list[BaseHouse]:
+    """Scrape every source and return the still-available listings."""
+    houses: list[BaseHouse] = []
+    for source_class in source_classes if source_classes is not None else SOURCES:
+        # mypy sees the abstract base; every registered subclass is concrete
+        # and defaults its own name/base_url fields
+        source = source_class()  # type: ignore[call-arg]
+        try:
+            found = source.get_base_house()
+        except Exception:
+            logger.warning("Source %s failed entirely, skipping", source.name)
+            continue
+        logger.info("%s: %d available listings", source.name, len(found))
+        houses.extend(found)
+    return houses
+
 
 def read_houses(database_path: Path) -> None:
     database_db = HuisVinderDb(database_path=database_path)
-    sources = [
-        DeDijle,
-        Immoweb,
-        Immovlan,
-        Century21,
-        JanStas,
-        BVMVastgoed,
-        Immolight,
-        ImmoHorst,
-        MarnixVastgoed,
-        CovasImmo,
-        ImmoWonen,
-        YourHouseVastgoed,
-        ImmoTerDuin,
-        Realium,
-        ImmoTime,
-        ImmoRuelens,
-        DeImmoMakelaar,
-        ImmoGVE,
-        WeInvest,
-        ERAVandendries,
-    ]
-    for source in sources:
-        # mypy sees the list as type[BaseSource]; every member is concrete
-        source_ = source()  # type: ignore[abstract]
-        try:
-            houses = source_.get_base_house()
-        except Exception:  # noqa: S112 -- one broken site must not abort the run
-            continue
-        if houses:
-            database_db.add_houses(houses)
+    database_db.add_houses(collect_houses())
