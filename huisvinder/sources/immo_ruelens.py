@@ -1,5 +1,4 @@
 import datetime
-from typing import List, Optional
 
 from bs4 import Tag
 
@@ -11,7 +10,7 @@ MAX_PRICE = 400000
 SOLD_STICKERS = {"verkocht", "recent verkocht"}
 
 
-def _icon_value(card: Tag, icon_selector: str) -> Optional[str]:
+def _icon_value(card: Tag, icon_selector: str) -> str | None:
     icon = card.select_one(f".spotlight__hover {icon_selector}")
     if icon is None or icon.parent is None:
         return None
@@ -21,10 +20,7 @@ def _icon_value(card: Tag, icon_selector: str) -> Optional[str]:
 
 class ImmoRuelens(BaseSource):
     name: Sources = "ImmoRuelens"
-    base_url: str = (
-        f"https://www.immoruelens.be/nl/te-koop/"
-        f"?type%5B%5D=5&type%5B%5D=1&price-max={MAX_PRICE}"
-    )
+    base_url: str = f"https://www.immoruelens.be/nl/te-koop/?type%5B%5D=5&type%5B%5D=1&price-max={MAX_PRICE}"
 
     def _get_page_urls(self) -> list[str]:
         # all listings render on a single page
@@ -32,7 +28,7 @@ class ImmoRuelens(BaseSource):
             self.base_url,
         ]
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         soup = get_static_soup(page_url)
         cards = soup.select("div.spotlight")
 

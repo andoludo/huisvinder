@@ -1,5 +1,4 @@
 import datetime
-from typing import List
 from urllib.parse import urljoin
 
 from huisvinder.models import BaseSource, BaseHouse
@@ -19,7 +18,7 @@ class ImmoWonen(BaseSource):
             self.base_url,
         ]
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         soup = get_static_soup(page_url)
         cards = soup.select("div.property-list div.property")
 
@@ -48,9 +47,7 @@ class ImmoWonen(BaseSource):
                 category = category or None
 
             description_tag = card.select_one(".desc")
-            description = (
-                description_tag.get_text(strip=True) if description_tag else None
-            )
+            description = description_tag.get_text(strip=True) if description_tag else None
 
             results.append(
                 {

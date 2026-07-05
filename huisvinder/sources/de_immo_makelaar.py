@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, List, Optional
+from typing import Any
 from urllib.parse import urljoin
 
 import requests
@@ -11,7 +11,7 @@ from huisvinder.types import Sources
 MAX_PRICE = 400000
 
 
-def _as_str(value: Any) -> Optional[str]:
+def _as_str(value: Any) -> str | None:
     if value in (None, "", 0):
         return None
     return str(value)
@@ -22,20 +22,15 @@ class DeImmoMakelaar(BaseSource):
     Skarabee/Zabun publication feed as JSON; scrape that instead."""
 
     name: Sources = "DeImmoMakelaar"
-    base_url: str = (
-        "https://www.deimmomakelaar.be/query/SearchPublications"
-        "?transactiontype=Sale&language=NL"
-    )
+    base_url: str = "https://www.deimmomakelaar.be/query/SearchPublications?transactiontype=Sale&language=NL"
 
     def _get_page_urls(self) -> list[str]:
         return [
             self.base_url,
         ]
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
-        response = requests.get(
-            page_url, headers=REQUEST_HEADERS, timeout=REQUEST_TIMEOUT
-        )
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
+        response = requests.get(page_url, headers=REQUEST_HEADERS, timeout=REQUEST_TIMEOUT)
         response.raise_for_status()
         publications = response.json().get("Publications", [])
 
@@ -69,9 +64,7 @@ class DeImmoMakelaar(BaseSource):
                     "bedrooms": _as_str(estate.get("NumberOfBedrooms")),
                     "living_area": _as_str(estate.get("HabitableArea")),
                     "surface_ground": _as_str(estate.get("LandArea")),
-                    "description": _as_str(
-                        (publication.get("Flash") or {}).get("Title")
-                    ),
+                    "description": _as_str((publication.get("Flash") or {}).get("Title")),
                 }
             )
         return [BaseHouse.model_validate(r) for r in results]

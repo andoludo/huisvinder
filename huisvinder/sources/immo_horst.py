@@ -1,5 +1,4 @@
 import datetime
-from typing import List, Optional
 from urllib.parse import urljoin
 
 from bs4 import Tag
@@ -11,7 +10,7 @@ from huisvinder.types import Sources
 MAX_PRICE = 400000
 
 
-def _icon_sibling_text(card: Tag, svg_class: str) -> Optional[str]:
+def _icon_sibling_text(card: Tag, svg_class: str) -> str | None:
     icon = card.select_one(f".shortinfo svg.{svg_class}")
     if icon is None or icon.next_sibling is None:
         return None
@@ -27,7 +26,7 @@ class ImmoHorst(BaseSource):
             self.base_url,
         ]
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         soup = get_static_soup(page_url)
         cards = soup.select("div.estate-list_item")
 
@@ -49,9 +48,7 @@ class ImmoHorst(BaseSource):
                 city = address_tag.get_text(strip=True).split(",")[0].strip()
 
             category_tag = card.select_one(".info h3")
-            category = (
-                " ".join(category_tag.get_text().split()) if category_tag else None
-            )
+            category = " ".join(category_tag.get_text().split()) if category_tag else None
 
             results.append(
                 {

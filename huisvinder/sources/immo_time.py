@@ -1,5 +1,4 @@
 import datetime
-from typing import List, Optional
 
 from bs4 import Tag
 
@@ -10,7 +9,7 @@ from huisvinder.types import Sources
 MAX_PRICE = 400000
 
 
-def _icon_value(card: Tag, icon_class: str) -> Optional[str]:
+def _icon_value(card: Tag, icon_class: str) -> str | None:
     icon = card.select_one(f"i.fas.{icon_class}")
     if icon is None or icon.parent is None:
         return None
@@ -28,7 +27,7 @@ class ImmoTime(BaseSource):
             self.base_url,
         ]
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         soup = get_static_soup(page_url)
         cards = soup.select("ul.fusion-grid-posts-cards > li.post-card")
 
@@ -45,9 +44,7 @@ class ImmoTime(BaseSource):
             price = price_tag.get_text(strip=True)
 
             city_tag = card.select_one("span.acf-view__city")
-            city = (
-                city_tag.get_text(strip=True).rstrip(",").strip() if city_tag else None
-            )
+            city = city_tag.get_text(strip=True).rstrip(",").strip() if city_tag else None
 
             title_tag = card.select_one("h5.acf-view__type-description")
             description = title_tag.get_text(strip=True) if title_tag else None

@@ -1,6 +1,5 @@
 import datetime
 import re
-from typing import List, Optional
 from urllib.parse import urljoin
 
 from bs4 import Tag
@@ -12,9 +11,7 @@ from huisvinder.types import Sources
 
 class DeDijle(BaseSource):
     name: Sources = "DeDijle"
-    base_url: str = (
-        "https://immodedijle.be/nl/te-koop?type=1&type=3&price-min=250000&price-max=400000"
-    )
+    base_url: str = "https://immodedijle.be/nl/te-koop?type=1&type=3&price-min=250000&price-max=400000"
 
     def _get_page_urls(self) -> list[str]:
         return [
@@ -22,7 +19,7 @@ class DeDijle(BaseSource):
         ]
 
     @staticmethod
-    def _get_features(prop: Tag) -> tuple[Optional[str], Optional[str]]:
+    def _get_features(prop: Tag) -> tuple[str | None, str | None]:
         # The feature list renders as plain text items: bedrooms, bathrooms,
         # area (icons are injected by JavaScript, absent from static HTML).
         bedrooms = living_area = None
@@ -36,7 +33,7 @@ class DeDijle(BaseSource):
                 bedrooms = text
         return bedrooms, living_area
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         soup = get_static_soup(page_url)
         properties = soup.find_all("div", class_="col-12 col-md-6 col-lg-4")
 

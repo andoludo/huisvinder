@@ -1,5 +1,4 @@
 import datetime
-from typing import List, Optional
 from urllib.parse import urljoin
 
 from bs4 import Tag
@@ -11,7 +10,7 @@ from huisvinder.types import Sources
 MAX_PRICE = 400000
 
 
-def _icon_value(card: Tag, icon_title: str) -> Optional[str]:
+def _icon_value(card: Tag, icon_title: str) -> str | None:
     for block in card.select("figcaption .wrap-icon-info"):
         title_tag = block.select_one("p.icon-ttl")
         if title_tag is None or title_tag.get_text(strip=True) != icon_title:
@@ -24,19 +23,13 @@ def _icon_value(card: Tag, icon_title: str) -> Optional[str]:
 
 class Immolight(BaseSource):
     name: Sources = "Immolight"
-    base_url: str = (
-        f"https://www.immolight.be/te-koop?searchon=list&sorts=Dwelling,Flat"
-        f"&price-to={MAX_PRICE}"
-    )
+    base_url: str = f"https://www.immolight.be/te-koop?searchon=list&sorts=Dwelling,Flat&price-to={MAX_PRICE}"
 
     def _get_page_urls(self) -> list[str]:
         max_page = 5
-        return [
-            f"{self.base_url}&pageindex={page_number}&pagesize=12"
-            for page_number in range(1, max_page + 1)
-        ]
+        return [f"{self.base_url}&pageindex={page_number}&pagesize=12" for page_number in range(1, max_page + 1)]
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         soup = get_static_soup(page_url)
         cards = soup.select("a.pand-wrapper")
 

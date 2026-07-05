@@ -5,10 +5,11 @@ import time
 from contextlib import contextmanager
 from pathlib import Path
 from time import sleep
-from typing import Optional, Callable, Generator, Any
+from typing import Any
+from collections.abc import Callable, Generator
 
 import requests
-import undetected_chromedriver as uc  # type: ignore[import-untyped]
+import undetected_chromedriver as uc  # type: ignore[import-untyped] # no stubs shipped
 from bs4 import BeautifulSoup
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
@@ -19,10 +20,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 logger = logging.getLogger(__name__)
 
 REQUEST_HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"
-        " (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
-    ),
+    "User-Agent": ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"),
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9,nl;q=0.8",
 }
@@ -60,7 +58,7 @@ def web_browser(
     url: str,
     load_strategy_none: bool = False,
     headless: bool = False,
-    callback: Optional[Callable[[WebDriver], None]] = None,
+    callback: Callable[[WebDriver], None] | None = None,
 ) -> Generator[WebDriver, Any, None]:
     browser = uc.Chrome(headless=headless, use_subprocess=False)
     browser.set_page_load_timeout(30)
@@ -91,18 +89,14 @@ def temporary_web_page(
     url: str,
     load_strategy_none: bool = False,
     headless: bool = False,
-    callback: Optional[Callable[[WebDriver], None]] = None,
+    callback: Callable[[WebDriver], None] | None = None,
 ) -> Generator[BeautifulSoup, Any, None]:
-    with web_browser(
-        url, load_strategy_none, headless, callback=callback
-    ) as browser, soup_page(browser) as soup:
+    with web_browser(url, load_strategy_none, headless, callback=callback) as browser, soup_page(browser) as soup:
         yield soup
         browser.quit()
 
 
-def find_cookie_banner(
-    browser: WebDriver, xpath: str, iframe: Optional[str] = None
-) -> None:
+def find_cookie_banner(browser: WebDriver, xpath: str, iframe: str | None = None) -> None:
     if iframe is None:
         try:
             button = browser.find_element(By.XPATH, xpath)
@@ -114,13 +108,9 @@ def find_cookie_banner(
     else:
         try:
             WebDriverWait(browser, 10).until(
-                expected_conditions.frame_to_be_available_and_switch_to_it(
-                    (By.XPATH, iframe)
-                )
+                expected_conditions.frame_to_be_available_and_switch_to_it((By.XPATH, iframe))
             )
-            WebDriverWait(browser, 10).until(
-                expected_conditions.element_to_be_clickable((By.XPATH, xpath))
-            ).click()
+            WebDriverWait(browser, 10).until(expected_conditions.element_to_be_clickable((By.XPATH, xpath))).click()
             browser.switch_to.default_content()
         except Exception as e:
             logger.warning(f"Cookie banner: {e}")

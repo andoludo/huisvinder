@@ -1,6 +1,5 @@
 import datetime
 import re
-from typing import List, Optional
 
 from bs4 import Tag
 
@@ -11,7 +10,7 @@ from huisvinder.types import Sources
 MAX_PRICE = 400000
 
 
-def _feature_value(card: Tag, icon_class: str) -> Optional[str]:
+def _feature_value(card: Tag, icon_class: str) -> str | None:
     icon = card.select_one(f"div.property__features span.{icon_class}")
     if icon is None or icon.parent is None:
         return None
@@ -26,13 +25,10 @@ class BVMVastgoed(BaseSource):
         max_page = 6
         return [
             self.base_url,
-            *[
-                f"{self.base_url}/pagina-{page_number}"
-                for page_number in range(2, max_page + 1)
-            ],
+            *[f"{self.base_url}/pagina-{page_number}" for page_number in range(2, max_page + 1)],
         ]
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         soup = get_static_soup(page_url)
         # scoped to search results: bare div.property also matches <template> stubs
         cards = soup.select("div.search-results > div.property")
@@ -55,11 +51,7 @@ class BVMVastgoed(BaseSource):
             city = None
             city_tag = card.select_one("p.property__city")
             if city_tag:
-                lines = [
-                    line.strip()
-                    for line in city_tag.get_text("\n").splitlines()
-                    if line.strip()
-                ]
+                lines = [line.strip() for line in city_tag.get_text("\n").splitlines() if line.strip()]
                 if lines:
                     city = lines[-1]
 

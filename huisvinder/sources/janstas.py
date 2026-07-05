@@ -1,5 +1,4 @@
 import datetime
-from typing import List
 from urllib.parse import urljoin
 
 from huisvinder.models import BaseSource, BaseHouse
@@ -16,7 +15,7 @@ class JanStas(BaseSource):
             self.base_url,
         ]
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         soup = get_static_soup(page_url)
         properties = soup.find_all("div", class_="col-sm-6 col-lg-4 estate")
         results = []

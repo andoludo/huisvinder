@@ -48,10 +48,11 @@ def read_houses(database_path: Path) -> None:
         ERAVandendries,
     ]
     for source in sources:
+        # mypy sees the list as type[BaseSource]; every member is concrete
         source_ = source()  # type: ignore[abstract]
         try:
             houses = source_.get_base_house()
-        except Exception:  # noqa: S112
+        except Exception:  # noqa: S112 -- one broken site must not abort the run
             continue
         if houses:
             database_db.add_houses(houses)

@@ -1,6 +1,5 @@
 import datetime
 import time
-from typing import List, Optional
 
 from pydantic import BaseModel
 from selenium.webdriver.chrome.webdriver import WebDriver
@@ -17,15 +16,13 @@ from huisvinder.types import Sources
 
 class Selector(BaseModel):
     selector: str
-    attribute: Optional[str] = None
+    attribute: str | None = None
     name: str
 
 
 def remove_banner(browser: WebDriver) -> None:
     host = WebDriverWait(browser, 60).until(
-        expected_conditions.presence_of_element_located(
-            (By.CSS_SELECTOR, "#usercentrics-root")
-        )
+        expected_conditions.presence_of_element_located((By.CSS_SELECTOR, "#usercentrics-root"))
     )
     for _ in range(60):  # 10 checks per second
         shadow = browser.execute_script("return arguments[0].shadowRoot", host)
@@ -41,9 +38,7 @@ def remove_banner(browser: WebDriver) -> None:
     ok_button.click()
 
 
-def _get_data(
-    item: WebElement, css_selector: str, attribute: Optional[str] = None
-) -> Optional[str]:
+def _get_data(item: WebElement, css_selector: str, attribute: str | None = None) -> str | None:
     try:
         if attribute:
             return item.find_element(By.CSS_SELECTOR, css_selector).get_attribute(  # type: ignore
@@ -57,9 +52,7 @@ def _get_data(
 SELECTORS = [
     Selector(name="link", attribute="href", selector="article a"),
     Selector(name="display_price", selector=".card--result__price .resizable-text"),
-    Selector(
-        name="city", selector=".card__information.card--results__information--locality"
-    ),
+    Selector(name="city", selector=".card__information.card--results__information--locality"),
     Selector(name="description", selector=".card--result__description"),
     Selector(
         name="bedrooms",
@@ -83,10 +76,7 @@ class Immoweb(BaseSource):
         max_page = 15
         return [
             self.base_url,
-            *[
-                self.base_url.replace("&page=1&", f"&page={page_number}&")
-                for page_number in range(2, max_page + 1)
-            ],
+            *[self.base_url.replace("&page=1&", f"&page={page_number}&") for page_number in range(2, max_page + 1)],
         ]
 
     @retry(
@@ -94,9 +84,8 @@ class Immoweb(BaseSource):
         stop=stop_after_attempt(3),  # max 5 attempts
         wait=wait_exponential(multiplier=0.5, min=0.5, max=8.0),
     )
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         with web_browser(page_url, headless=False, callback=remove_banner) as browser:
-
             items = browser.find_elements(By.CSS_SELECTOR, "li.search-results__item")
             results = []
             for item in items:

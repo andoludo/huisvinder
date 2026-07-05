@@ -1,5 +1,4 @@
 import datetime
-from typing import List
 
 from huisvinder.models import BaseSource, BaseHouse
 from huisvinder.utils import temporary_web_page, find_cookie_banner
@@ -10,9 +9,7 @@ xpath = "/html/body/div[1]/div/div/div/div/div/div[2]/button[2]"
 
 class Immovlan(BaseSource):
     name: Sources = "Immovlan"
-    base_url: str = (
-        "https://immovlan.be/nl/vastgoed?transactiontypes=te-koop,in-openbare-verkoop&propertytypes=huis,appartement&towns=3052-blanden&municipals=leuven,bertem,tienen&maxprice=400000&minbedrooms=2&noindex=1"
-    )
+    base_url: str = "https://immovlan.be/nl/vastgoed?transactiontypes=te-koop,in-openbare-verkoop&propertytypes=huis,appartement&towns=3052-blanden&municipals=leuven,bertem,tienen&maxprice=400000&minbedrooms=2&noindex=1"
 
     def _get_page_urls(self) -> list[str]:
         max_page = 15
@@ -24,7 +21,7 @@ class Immovlan(BaseSource):
             ],
         ]
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         with temporary_web_page(
             page_url,
             headless=False,

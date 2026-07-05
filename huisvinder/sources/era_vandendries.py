@@ -1,5 +1,4 @@
 import datetime
-from typing import List, Optional
 from urllib.parse import urljoin
 
 from bs4 import Tag
@@ -12,7 +11,7 @@ MAX_PRICE = 400000
 BROKER_ID = 6000184  # ERA Vandendries (Leuven area offices)
 
 
-def _card_text(card: Tag, selector: str) -> Optional[str]:
+def _card_text(card: Tag, selector: str) -> str | None:
     tag = card.select_one(selector)
     if tag is None:
         return None
@@ -25,11 +24,9 @@ class ERAVandendries(BaseSource):
 
     def _get_page_urls(self) -> list[str]:
         max_page = 8  # zero-based pages, 12 cards each
-        return [
-            f"{self.base_url}&page={page_number}" for page_number in range(max_page)
-        ]
+        return [f"{self.base_url}&page={page_number}" for page_number in range(max_page)]
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         soup = get_static_soup(page_url)
         cards = soup.select("article.node--property[about]")
 

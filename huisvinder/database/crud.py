@@ -1,7 +1,7 @@
 import logging
 from functools import cached_property
 from pathlib import Path
-from typing import Any, List
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import Engine, create_engine, insert
@@ -28,9 +28,9 @@ class HuisVinderDb(BaseModel):
         return engine
 
     def model_post_init(self, __context: Any) -> None:
-        self._engine  # noqa: B018
+        self._engine  # noqa: B018 -- touch the cached property to run migrations eagerly
 
-    def add_houses(self, houses: List[BaseHouse]) -> None:
+    def add_houses(self, houses: list[BaseHouse]) -> None:
         with Session(self._engine) as session:
             houses_ = [h.model_dump() for h in houses]
             stmt = insert(BaseHouseORM).prefix_with("OR REPLACE").values(houses_)

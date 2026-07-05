@@ -1,6 +1,5 @@
 import datetime
 import re
-from typing import List
 from urllib.parse import urljoin
 
 from huisvinder.models import BaseSource, BaseHouse
@@ -22,7 +21,7 @@ class YourHouseVastgoed(BaseSource):
             self.base_url,
         ]
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         soup = get_static_soup(page_url)
         cards = soup.select("div.estate-list-large-item")
 

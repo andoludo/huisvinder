@@ -1,5 +1,4 @@
 import datetime
-from typing import List, Optional
 
 from bs4 import Tag
 
@@ -10,7 +9,7 @@ from huisvinder.types import Sources
 MAX_PRICE = 400000
 
 
-def _card_text(card: Tag, selector: str) -> Optional[str]:
+def _card_text(card: Tag, selector: str) -> str | None:
     tag = card.select_one(selector)
     if tag is None:
         return None
@@ -27,7 +26,7 @@ class ImmoGVE(BaseSource):
             self.base_url,
         ]
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         soup = get_static_soup(page_url)
         # the card is the anchor itself; call-to-action tiles lack it
         cards = soup.select("section.properties-list li.property a.property-contents")

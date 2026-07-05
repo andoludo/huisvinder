@@ -1,5 +1,4 @@
 import datetime
-from typing import List
 from urllib.parse import urljoin
 
 from huisvinder.models import BaseSource, BaseHouse
@@ -18,7 +17,7 @@ class CovasImmo(BaseSource):
             self.base_url,
         ]
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         soup = get_static_soup(page_url)
         cards = soup.select("section.products article.product")
 

@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, List, Optional
+from typing import Any
 
 import requests
 
@@ -12,7 +12,7 @@ LEUVEN_AGENCY_ID = 33
 PAGE_SIZE = 25
 
 
-def _as_str(value: Any) -> Optional[str]:
+def _as_str(value: Any) -> str | None:
     if value in (None, ""):
         return None
     return str(value)
@@ -33,15 +33,10 @@ class WeInvest(BaseSource):
 
     def _get_page_urls(self) -> list[str]:
         max_page = 4
-        return [
-            f"{self.base_url}&pagination%5Boffset%5D={page_number * PAGE_SIZE}"
-            for page_number in range(max_page)
-        ]
+        return [f"{self.base_url}&pagination%5Boffset%5D={page_number * PAGE_SIZE}" for page_number in range(max_page)]
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
-        response = requests.get(
-            page_url, headers=REQUEST_HEADERS, timeout=REQUEST_TIMEOUT
-        )
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
+        response = requests.get(page_url, headers=REQUEST_HEADERS, timeout=REQUEST_TIMEOUT)
         response.raise_for_status()
         properties = response.json().get("data", [])
 
@@ -53,10 +48,7 @@ class WeInvest(BaseSource):
             if not property_id or not city or not category:
                 continue
             city_slug = city.lower().replace(" ", "-")
-            link = (
-                f"https://weinvest.be/nl-BE/property/for-sale"
-                f"/{city_slug}/{category}/{property_id}"
-            )
+            link = f"https://weinvest.be/nl-BE/property/for-sale/{city_slug}/{category}/{property_id}"
 
             price = property_.get("priceAsAdvertised")
             display_price = f"€ {price:,.0f}".replace(",", ".") if price else None

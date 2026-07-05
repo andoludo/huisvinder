@@ -1,6 +1,5 @@
 import datetime
 import re
-from typing import List, Optional
 
 from bs4 import Tag
 
@@ -12,10 +11,8 @@ MAX_PRICE = 400000
 ADDRESS_PATTERN = re.compile(r"\b(\d{4})\s+(.+)$")
 
 
-def _field_value(card: Tag, field: str) -> Optional[str]:
-    value_tag = card.select_one(
-        f".oc-property-fields__item--{field} .oc-property-fields__value"
-    )
+def _field_value(card: Tag, field: str) -> str | None:
+    value_tag = card.select_one(f".oc-property-fields__item--{field} .oc-property-fields__value")
     return value_tag.get_text(strip=True) if value_tag else None
 
 
@@ -29,13 +26,10 @@ class Century21(BaseSource):
         for property_type in ["house", "apartment"]:
             query = f"?oc_property_type={property_type}&oc_price_max={MAX_PRICE}"
             urls.append(f"{self.base_url}{query}")
-            urls.extend(
-                f"{self.base_url}page/{page_number}/{query}"
-                for page_number in range(2, max_page + 1)
-            )
+            urls.extend(f"{self.base_url}page/{page_number}/{query}" for page_number in range(2, max_page + 1))
         return urls
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         soup = get_static_soup(page_url)
         cards = soup.select("div.e-loop-item.property")
 

@@ -1,5 +1,4 @@
 import datetime
-from typing import List, Optional
 from urllib.parse import urljoin
 
 from bs4 import Tag
@@ -11,7 +10,7 @@ from huisvinder.types import Sources
 MAX_PRICE = 400000
 
 
-def _feature_value(card: Tag, feature: str) -> Optional[str]:
+def _feature_value(card: Tag, feature: str) -> str | None:
     value_tag = card.select_one(f"dl.feature__item--{feature} dd")
     return value_tag.get_text(strip=True) if value_tag else None
 
@@ -26,12 +25,9 @@ class MarnixVastgoed(BaseSource):
 
     def _get_page_urls(self) -> list[str]:
         max_page = 5
-        return [
-            f"{self.base_url}&pageindex={page_number}"
-            for page_number in range(1, max_page + 1)
-        ]
+        return [f"{self.base_url}&pageindex={page_number}" for page_number in range(1, max_page + 1)]
 
-    def _get_page_data(self, page_url: str) -> List[BaseHouse]:
+    def _get_page_data(self, page_url: str) -> list[BaseHouse]:
         soup = get_static_soup(page_url)
         cards = soup.select("article.card--property")
 
@@ -41,9 +37,7 @@ class MarnixVastgoed(BaseSource):
             if link_tag is None:
                 continue
             # strip the per-request tracking querystring so links stay stable
-            link = urljoin(
-                "https://www.marnixvastgoed.be/", str(link_tag["href"])
-            ).split("?")[0]
+            link = urljoin("https://www.marnixvastgoed.be/", str(link_tag["href"])).split("?")[0]
 
             price_tag = card.select_one(".card-header h4.card__subtitle")
             if price_tag is None:
@@ -57,7 +51,7 @@ class MarnixVastgoed(BaseSource):
             category = None
             title = str(link_tag.get("title") or "")
             if title.lower().startswith("te koop"):
-                category = title[len("te koop") :].split(" - ")[0].strip() or None
+                category = title[len("te koop") :].split(" - ", maxsplit=1)[0].strip() or None
 
             results.append(
                 {
