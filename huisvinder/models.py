@@ -1,10 +1,13 @@
+import logging
 from abc import abstractmethod
-from datetime import date, datetime
+from datetime import datetime
 from typing import Optional, List
 
 from pydantic import BaseModel
 
 from huisvinder.types import Sources
+
+logger = logging.getLogger(__name__)
 
 
 class BaseHouse(BaseModel):
@@ -44,6 +47,7 @@ class BaseSource(BaseModel):
             try:
                 page_data = self._get_page_data(page_url)
             except Exception:
+                logger.warning("Failed to scrape %s page %s", self.name, page_url)
                 continue
             base_houses.extend(page_data)
         return base_houses

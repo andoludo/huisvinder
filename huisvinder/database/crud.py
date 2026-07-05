@@ -9,7 +9,7 @@ from sqlmodel import Session
 
 from huisvinder.database.schemas import BaseHouseORM
 from huisvinder.database.scripts.upgrade import upgrade
-from huisvinder.models import House, BaseHouse
+from huisvinder.models import BaseHouse
 
 logger = logging.getLogger(__name__)
 
@@ -34,5 +34,5 @@ class HuisVinderDb(BaseModel):
         with Session(self._engine) as session:
             houses_ = [h.model_dump() for h in houses]
             stmt = insert(BaseHouseORM).prefix_with("OR REPLACE").values(houses_)
-            session.exec(stmt)  # type: ignore
+            session.exec(stmt)
             session.commit()

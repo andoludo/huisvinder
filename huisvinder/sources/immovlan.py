@@ -36,7 +36,7 @@ class Immovlan(BaseSource):
 
             for art in articles:
                 link_tag = art.find("a", href=True)
-                link = link_tag["href"] if link_tag else None  # type: ignore
+                link = link_tag["href"] if link_tag else None
                 if link is None:
                     continue
                 price_tag = art.find("strong", class_="list-item-price")
