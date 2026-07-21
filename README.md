@@ -1,6 +1,6 @@
 # huisvinder
 
-Scrapes houses and apartments for sale (≤ €400k, Leuven area, Belgium) from 21 real-estate sites into SQLite and CSV/JSON.
+Scrapes houses and apartments for sale (≤ €400k, Leuven area, Belgium) from 22 real-estate sites into SQLite and CSV/JSON.
 
 ## Install
 
@@ -39,11 +39,11 @@ This writes `houses.csv` and upserts into `building.db`. Rows are keyed on `(sou
 
 ## Supported sources
 
-Immoweb, Immovlan, Realo, Century 21 Connect, Immo De Dijle, Immo Jan Stas, BVM Vastgoed, Immolight, Immo Horst, Marnix Vastgoed, Covas Immo, ImmoWonen, Your House Vastgoed, Immo Ter Duin, Realium, Immo-Time, José Ruelens, De Immo Makelaar, Immo GVE, We Invest Leuven, ERA Vandendries.
+Immoweb, Immovlan, Realo, Homies, Century 21 Connect, Immo De Dijle, Immo Jan Stas, BVM Vastgoed, Immolight, Immo Horst, Marnix Vastgoed, Covas Immo, ImmoWonen, Your House Vastgoed, Immo Ter Duin, Realium, Immo-Time, José Ruelens, De Immo Makelaar, Immo GVE, We Invest Leuven, ERA Vandendries.
 
 ## How it works / limitations
 
-Every source is scraped over plain HTTP (`httpx`, HTTP/2, retry with backoff) — either server-rendered HTML parsed with BeautifulSoup or the site's own JSON endpoint (Immoweb, We Invest, De Immo Makelaar). No browser automation. Sold / under-option listings are skipped; where a site offers no server-side price filter, the €400k cap is applied client-side. Search areas and the price cap are currently hard-coded per source.
+Every source is scraped over plain HTTP (`httpx`, HTTP/2, retry with backoff) — either server-rendered HTML parsed with BeautifulSoup or the site's own JSON endpoint (Immoweb, We Invest, De Immo Makelaar). No browser automation. Where a site offers no server-side price filter, the €400k cap is applied client-side. Search areas are currently hard-coded per source.
 
 Each listing stores the display price plus a derived numeric `price`, city, bedrooms, areas, `address`, `epc`, `garage`, `garden` and a normalized `status` (`available` / `option` / `sold`) taken from the sites' sold- and option-badges, so genuinely available houses are easy to single out (`WHERE status = 'available'` or `pull --available-only`). Sold cards that carry no link cannot be stored and are skipped. Address and EPC come from the listing cards where available; by default `pull` also fetches every listing's **detail page** (one extra request each) and fills the missing EPC/address/garage/garden from the spec tables all these sites render. Disable with `--no-details` for a fast card-only run. The €400k budget cap lives in `huisvinder/config.py` (`MAX_PRICE`).
 

@@ -19,6 +19,7 @@ from huisvinder.sources.century_21 import Century21
 from huisvinder.sources.covas import CovasImmo
 from huisvinder.sources.de_immo_makelaar import DeImmoMakelaar
 from huisvinder.sources.era_vandendries import ERAVandendries
+from huisvinder.sources.homies import Homies
 from huisvinder.sources.immo_gve import ImmoGVE
 from huisvinder.sources.immo_horst import ImmoHorst
 from huisvinder.sources.immo_ruelens import ImmoRuelens
@@ -393,6 +394,23 @@ CASES = [
             "category": "Huis",
             "bedrooms": "3",
             "living_area": "86 m²",
+        },
+    ),
+    SourceCase(
+        Homies,
+        "huisvinder.sources.homies",
+        "homies.html",
+        cards_in_fixture=3,
+        expected_count=3,
+        n_page_urls=1,
+        first={
+            "link": "https://homies.be/panden/4408388/",
+            "display_price": "€ 380.000",
+            "price": 380000.0,
+            "city": "Leuven",
+            "category": "Huis",
+            "status": "available",
+            "description": "Te renoveren woning op een boogscheut centrum Leuven",
         },
     ),
     SourceCase(

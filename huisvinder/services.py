@@ -10,6 +10,7 @@ from huisvinder.sources.century_21 import Century21
 from huisvinder.sources.covas import CovasImmo
 from huisvinder.sources.de_immo_makelaar import DeImmoMakelaar
 from huisvinder.sources.era_vandendries import ERAVandendries
+from huisvinder.sources.homies import Homies
 from huisvinder.sources.immo_gve import ImmoGVE
 from huisvinder.sources.immo_horst import ImmoHorst
 from huisvinder.sources.immo_ruelens import ImmoRuelens
@@ -51,6 +52,7 @@ SOURCES: list[type[BaseSource]] = [
     WeInvest,
     ERAVandendries,
     Realo,
+    Homies,
 ]
 
 

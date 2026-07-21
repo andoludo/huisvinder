@@ -22,4 +22,5 @@ Sources = Literal[
     "WeInvest",
     "ERAVandendries",
     "Realo",
+    "Homies",
 ]
