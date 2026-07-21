@@ -46,6 +46,9 @@ class Immolight(BaseSource):
                 continue
             price = price_tag.get_text(strip=True)
 
+            address_tag = card.select_one(".boxed address")
+            address = address_tag.get_text(" ", strip=True) if address_tag else None
+
             city = category = None
             title_tag = card.select_one(".boxed h3")
             if title_tag:
@@ -60,6 +63,7 @@ class Immolight(BaseSource):
                     "link": link,
                     "category": category,
                     "city": city,
+                    "address": address,
                     "display_price": price,
                     "bedrooms": _icon_value(card, "SLAAPKAMER(S)"),
                     "living_area": _icon_value(card, "BEW. OPP."),

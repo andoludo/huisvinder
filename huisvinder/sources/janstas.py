@@ -2,7 +2,7 @@ import datetime
 from urllib.parse import urljoin
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup
+from huisvinder.utils import get_static_soup, normalize_epc
 from huisvinder.types import Sources
 
 
@@ -26,6 +26,9 @@ class JanStas(BaseSource):
                 link = urljoin("https://immojanstas.be/", str(link_tag["href"]))
             else:
                 continue
+
+            epc_img = prop.select_one("img.energy-label")
+            epc = normalize_epc(epc_img.get("alt")) if epc_img else None
 
             title_tag = prop.find("h3", class_="title")
             locality = title_tag.text.strip() if title_tag else None
@@ -62,6 +65,7 @@ class JanStas(BaseSource):
                     "display_price": price,
                     "bedrooms": bedrooms,
                     "living_area": living_area,
+                    "epc": epc,
                 }
             )
         return [BaseHouse.model_validate(r) for r in results]

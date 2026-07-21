@@ -2,7 +2,7 @@ import datetime
 from typing import Any
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_json
+from huisvinder.utils import get_json, normalize_epc
 from huisvinder.types import Sources
 
 MAX_PRICE = 400000
@@ -56,6 +56,7 @@ class WeInvest(BaseSource):
                     "link": link,
                     "category": category,
                     "city": city,
+                    "epc": normalize_epc(_as_str(property_.get("energyScore"))),
                     "display_price": display_price,
                     "bedrooms": _as_str(property_.get("bedroomCount")),
                     "living_area": _as_str(property_.get("livableArea")),

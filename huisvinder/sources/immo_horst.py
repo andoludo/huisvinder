@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 from bs4 import Tag
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup
+from huisvinder.utils import get_static_soup, normalize_epc
 from huisvinder.types import Sources
 
 MAX_PRICE = 400000
@@ -42,10 +42,14 @@ class ImmoHorst(BaseSource):
                 continue
             price = price_tag.get_text(strip=True)
 
-            city = None
+            city = address = None
             address_tag = card.select_one("span.address")
             if address_tag:
-                city = address_tag.get_text(strip=True).split(",")[0].strip()
+                address = address_tag.get_text(" ", strip=True)
+                city = address.split(",")[0].strip()
+
+            epc_img = card.select_one("img.energy-label")
+            epc = normalize_epc(epc_img.get("alt")) if epc_img else None
 
             category_tag = card.select_one(".info h3")
             category = " ".join(category_tag.get_text().split()) if category_tag else None
@@ -57,6 +61,8 @@ class ImmoHorst(BaseSource):
                     "link": link,
                     "category": category,
                     "city": city,
+                    "address": address,
+                    "epc": epc,
                     "display_price": price,
                     "bedrooms": _icon_sibling_text(card, "fa-bed"),
                     "living_area": _icon_sibling_text(card, "icon-surface"),

@@ -37,6 +37,8 @@ Immoweb, Immovlan, Realo, Century 21 Connect, Immo De Dijle, Immo Jan Stas, BVM 
 
 Every source is scraped over plain HTTP (`httpx`, HTTP/2, retry with backoff) — either server-rendered HTML parsed with BeautifulSoup or the site's own JSON endpoint (Immoweb, We Invest, De Immo Makelaar). No browser automation. Sold / under-option listings are skipped; where a site offers no server-side price filter, the €400k cap is applied client-side. Search areas and the price cap are currently hard-coded per source.
 
+Each listing stores the display price plus a derived numeric `price`, city, bedrooms and areas, and — where the site's listing cards expose them — a street `address` (~12 sources) and `epc` label (~10 sources). Heating systems only appear on detail pages and are not collected.
+
 Scrapers break when sites redesign. Offline fixture tests (`uv run pytest`) verify the parsers; `uv run pytest -m integration --no-cov` runs live smoke tests against the real sites to detect drift.
 
 ## Development

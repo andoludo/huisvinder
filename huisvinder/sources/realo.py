@@ -74,6 +74,7 @@ class Realo(BaseSource):
                     "link": link,
                     "category": category,
                     "city": city,
+                    "address": address,
                     "display_price": price,
                     "bedrooms": bedrooms,
                     "living_area": living_area,

@@ -3,7 +3,7 @@ import datetime
 from bs4 import Tag
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup
+from huisvinder.utils import get_static_soup, normalize_epc
 from huisvinder.types import Sources
 
 MAX_PRICE = 400000
@@ -56,6 +56,12 @@ class ImmoRuelens(BaseSource):
             city_tag = card.select_one(".spotlight__content__city")
             city = city_tag.get_text(strip=True) if city_tag else None
 
+            epc = None
+            epc_img = card.select_one(".spotlight__image__overlay-labels__energy-label img")
+            if epc_img is not None:
+                stem = str(epc_img.get("src", "")).rsplit("/", 1)[-1].removesuffix(".png")
+                epc = normalize_epc(stem.removeprefix("epc_"))
+
             type_tag = card.select_one(".spotlight__content__type")
             category = type_tag.get_text(strip=True) if type_tag else None
 
@@ -67,6 +73,7 @@ class ImmoRuelens(BaseSource):
                     "category": category,
                     "city": city,
                     "display_price": price,
+                    "epc": epc,
                     "bedrooms": _icon_value(card, "i.fa-bed"),
                     "living_area": _icon_value(card, "i.fa-home"),
                     "surface_ground": _icon_value(card, "span.icon-layers"),

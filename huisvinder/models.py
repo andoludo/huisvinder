@@ -2,9 +2,10 @@ import logging
 from abc import abstractmethod
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 from huisvinder.types import Sources
+from huisvinder.utils import parse_price
 
 logger = logging.getLogger(__name__)
 
@@ -14,19 +15,21 @@ class BaseHouse(BaseModel):
     created_at: datetime
     link: str
     display_price: str | None = None
+    price: float | None = None
     city: str | None = None
+    address: str | None = None
     category: str | None = None
     description: str | None = None
     bedrooms: str | None = None
     living_area: str | None = None
     surface_ground: str | None = None
-
-
-class House(BaseHouse):
-    price: float | None = None
     epc: str | None = None
-    construction_year: int | None = None
-    address: str | None = None
+
+    @model_validator(mode="after")
+    def _derive_price(self) -> "BaseHouse":
+        if self.price is None and self.display_price:
+            self.price = parse_price(self.display_price)
+        return self
 
 
 class BaseSource(BaseModel):

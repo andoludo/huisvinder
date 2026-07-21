@@ -3,7 +3,7 @@ import datetime
 from bs4 import Tag
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup
+from huisvinder.utils import get_static_soup, normalize_epc
 from huisvinder.types import Sources
 
 MAX_PRICE = 400000
@@ -41,6 +41,13 @@ class ImmoGVE(BaseSource):
             if price is None:
                 continue
 
+            epc = None
+            epc_tag = card.select_one(".epc div")
+            if epc_tag:
+                modifiers = [cls for cls in epc_tag.get_attribute_list("class") if str(cls).startswith("class_")]
+                if modifiers:
+                    epc = normalize_epc(modifiers[0].removeprefix("class_"))
+
             results.append(
                 {
                     "source": self.name,
@@ -48,6 +55,7 @@ class ImmoGVE(BaseSource):
                     "link": str(href),
                     "category": _card_text(card, "p.category"),
                     "city": _card_text(card, "p.city"),
+                    "epc": epc,
                     "display_price": price,
                     "bedrooms": _card_text(card, "ul.property-features li.rooms"),
                     "living_area": _card_text(card, "ul.property-features li.area"),

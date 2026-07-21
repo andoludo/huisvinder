@@ -34,7 +34,7 @@ from huisvinder.sources.realo import Realo
 from huisvinder.sources.ter_duin import ImmoTerDuin
 from huisvinder.sources.we_invest import WeInvest
 from huisvinder.sources.your_house import YourHouseVastgoed
-from huisvinder.utils import within_budget
+from huisvinder.utils import parse_price, within_budget
 
 
 @dataclass
@@ -45,7 +45,7 @@ class SourceCase:
     cards_in_fixture: int
     expected_count: int
     n_page_urls: int
-    first: dict[str, str | None] = field(default_factory=dict)
+    first: dict[str, str | float | None] = field(default_factory=dict)
     json_based: bool = False
 
     @property
@@ -64,6 +64,9 @@ CASES = [
         first={
             "link": "https://connect-immo.be/en/properties/3766/",
             "display_price": "€ 380.000",
+            "price": 380000.0,
+            "epc": "F",
+            "address": "Zoutrootjesstraat 10, 3210 Linden",
             "city": "Linden",
             "category": "House",
             "bedrooms": "3",
@@ -79,6 +82,8 @@ CASES = [
         n_page_urls=1,
         first={
             "display_price": "€ 285.000",
+            "price": 285000.0,
+            "epc": "F",
             "city": "Blankenberge",
             "category": "Eengezinswoning",
             "bedrooms": "2",
@@ -94,6 +99,8 @@ CASES = [
         n_page_urls=1,
         first={
             "display_price": "€ 185.000",
+            "price": 185000.0,
+            "epc": "B",
             "city": "Leuven",
             "category": "Studentenkamer",
             "bedrooms": "1",
@@ -109,6 +116,9 @@ CASES = [
         n_page_urls=6,
         first={
             "display_price": "€175.000",
+            "price": 175000.0,
+            "epc": "A",
+            "address": "Engels plein 14, 3000 Leuven",
             "city": "3000 Leuven",
             "category": "studentenkamer",
             "bedrooms": "1",
@@ -125,6 +135,8 @@ CASES = [
         first={
             "link": "https://www.immolight.be/detail/te-koop-woning-rotselaar/7593847",
             "display_price": "€ 628.000",
+            "price": 628000.0,
+            "address": "Steenweg Op Nieuwrode 212",
             "city": "Rotselaar",
             "category": "Woning",
             "bedrooms": "4",
@@ -140,6 +152,9 @@ CASES = [
         n_page_urls=1,
         first={
             "display_price": "€ 699.000",
+            "price": 699000.0,
+            "epc": "D",
+            "address": "Kampenhout, Meerlaan 56",
             "city": "Kampenhout",
             "category": "Eengezinswoning Te koop",
             "bedrooms": None,
@@ -213,6 +228,8 @@ CASES = [
         n_page_urls=1,
         first={
             "display_price": "€ 195.000",
+            "price": 195000.0,
+            "epc": "B",
             "city": "Leuven",
             "category": "Studio",
             "bedrooms": "1",
@@ -271,6 +288,8 @@ CASES = [
         first={
             "link": "https://www.immogve.be/huis-te-koop-in-aarschot/7749315",
             "display_price": "€\xa0283.000",
+            "price": 283000.0,
+            "epc": "C",
             "city": "Aarschot",
             "category": "Huis",
             "bedrooms": "3",
@@ -286,6 +305,8 @@ CASES = [
         n_page_urls=8,
         first={
             "display_price": "€ 89 000",
+            "price": 89000.0,
+            "address": "Rue de la Villa Romaine 39A, 6660 Houffalize",
             "city": "6660 Houffalize",
             "category": "grond",
             "bedrooms": None,
@@ -302,6 +323,8 @@ CASES = [
         first={
             "link": "https://weinvest.be/nl-BE/property/for-sale/sint-truiden/commercial/138896",
             "display_price": "€ 239.000",
+            "price": 239000.0,
+            "epc": "D",
             "city": "Sint-Truiden",
             "category": "commercial",
             "bedrooms": "0",
@@ -317,6 +340,9 @@ CASES = [
         json_based=True,
         first={
             "display_price": "€ 394.000",
+            "price": 394000.0,
+            "epc": "119.0",
+            "address": "Adolphe Bastinstraat 13, 3000 Leuven",
             "city": "Leuven",
             "category": "Residential",
             "bedrooms": "3",
@@ -333,6 +359,8 @@ CASES = [
         first={
             "link": "https://www.immoweb.be/en/classified/apartment/for-sale/heverlee/3001/21685566",
             "display_price": "€ 317.000",
+            "price": 317000.0,
+            "address": "Tiensesteenweg 222",
             "city": "Heverlee",
             "category": "Apartment",
             "bedrooms": "2",
@@ -349,6 +377,8 @@ CASES = [
         first={
             "link": "https://www.realo.be/nl/jozef-pierrestraat-86-3010-kessel-lo/3066883?l=2137809537",
             "display_price": "€ 235.000",
+            "price": 235000.0,
+            "address": "Jozef pierrestraat 86, 3010 Kessel-Lo",
             "city": "3010 Kessel-Lo",
             "category": "Huis",
             "bedrooms": "3",
@@ -456,6 +486,28 @@ def test_era_pages_are_zero_based():
 )
 def test_within_budget(display_price, expected):
     assert within_budget(display_price, 400000) is expected
+
+
+@pytest.mark.parametrize(
+    ("display_price", "expected"),
+    [
+        ("€ 235.000", 235000.0),
+        ("€175.000", 175000.0),
+        ("294\u202f900 € - 349\u202f900 €", 294900.0),
+        ("€ 175\xa0000", 175000.0),
+        ("Vanaf € 200.000", 200000.0),
+        ("Prijs op aanvraag", None),
+    ],
+)
+def test_parse_price(display_price, expected):
+    assert parse_price(display_price) == expected
+
+
+@pytest.mark.parametrize("case", CASES, ids=CASE_IDS)
+def test_numeric_price_is_derived(case):
+    for house in parse_fixture(case):
+        if house.display_price and any(ch.isdigit() for ch in house.display_price):
+            assert house.price is not None
 
 
 def test_get_base_house_survives_broken_pages():

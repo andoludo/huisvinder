@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 from bs4 import Tag
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup
+from huisvinder.utils import get_static_soup, normalize_epc
 from huisvinder.types import Sources
 
 
@@ -56,6 +56,9 @@ class DeDijle(BaseSource):
             if price is None:
                 continue
 
+            epc_img = prop.select_one("img.energy-label")
+            epc = normalize_epc(epc_img.get("alt")) if epc_img else None
+
             loc_tag = prop.select_one(".estate-info-location .location")
             if loc_tag:
                 locality = loc_tag.get_text(strip=True)
@@ -72,6 +75,7 @@ class DeDijle(BaseSource):
                     "display_price": price,
                     "bedrooms": bedrooms,
                     "living_area": living_area,
+                    "epc": epc,
                 }
             )
         return [BaseHouse.model_validate(r) for r in results]

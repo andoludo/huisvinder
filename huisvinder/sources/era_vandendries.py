@@ -61,6 +61,7 @@ class ERAVandendries(BaseSource):
                     "link": link,
                     "category": category,
                     "city": city,
+                    "address": address,
                     "display_price": price,
                     "bedrooms": _card_text(card, ".field--bedrooms"),
                     "living_area": _card_text(card, ".field--habitable-space"),

@@ -2,7 +2,7 @@ import datetime
 from urllib.parse import urljoin
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup, within_budget
+from huisvinder.utils import get_static_soup, normalize_epc, within_budget
 from huisvinder.types import Sources
 
 MAX_PRICE = 400000
@@ -37,6 +37,9 @@ class ImmoTerDuin(BaseSource):
             if not within_budget(price, MAX_PRICE):
                 continue
 
+            epc_img = card.select_one("img.energy-label")
+            epc = normalize_epc(epc_img.get("alt")) if epc_img else None
+
             category = city = None
             title_tag = card.select_one("h2.title")
             if title_tag:
@@ -62,6 +65,7 @@ class ImmoTerDuin(BaseSource):
                     "link": link,
                     "category": category,
                     "city": city,
+                    "epc": epc,
                     "display_price": price,
                     "bedrooms": bedrooms,
                     "living_area": living_area,

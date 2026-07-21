@@ -47,6 +47,9 @@ class MarnixVastgoed(BaseSource):
             city_tag = card.select_one("h3.card-title span")
             city = city_tag.get_text(strip=True) if city_tag else None
 
+            address_tag = card.select_one(".card-body__address address")
+            address = address_tag.get_text(" ", strip=True) if address_tag else None
+
             # link title reads "Te koop studentenkamer - Leuven"
             category = None
             title = str(link_tag.get("title") or "")
@@ -60,6 +63,7 @@ class MarnixVastgoed(BaseSource):
                     "link": link,
                     "category": category,
                     "city": city,
+                    "address": address,
                     "display_price": price,
                     "bedrooms": _feature_value(card, "bed"),
                     "living_area": _feature_value(card, "habitable"),

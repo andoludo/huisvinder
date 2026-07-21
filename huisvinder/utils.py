@@ -24,15 +24,36 @@ REQUEST_DELAY_ENV = "HUISVINDER_REQUEST_DELAY"
 DEFAULT_REQUEST_DELAY = 0.5
 
 
+# first amount in strings like "€ 235.000", "€175.000", "294 900 € - 349 900 €"
+PRICE_TOKEN = re.compile(r"\d{1,3}(?:[.\u00a0\u202f ]\d{3})+|\d+")
+
+
+def parse_price(display_price: str) -> float | None:
+    """Extract the (first) numeric amount from a display price string."""
+    match = PRICE_TOKEN.search(display_price)
+    if match is None:
+        return None
+    return float(re.sub(r"\D", "", match.group()))
+
+
+def normalize_epc(raw: object) -> str | None:
+    """Normalize EPC indicators like 'epc waarde f', 'a-plus' or 'c' to 'F'/'A+'/'C'."""
+    if not raw:
+        return None
+    token = str(raw).strip().lower().removeprefix("epc waarde").strip()
+    token = re.sub(r"[-_ ]?plus", "+", token)
+    return token.upper() or None
+
+
 def within_budget(display_price: str, max_price: int) -> bool:
     """Client-side price cap for sites without a server-side price filter.
 
-    Prices that carry no digits at all (e.g. 'prijs op aanvraag') are kept,
+    Prices that carry no amount at all (e.g. 'prijs op aanvraag') are kept,
     as they cannot be compared against the budget."""
-    digits = re.sub(r"\D", "", display_price)
-    if not digits:
+    price = parse_price(display_price)
+    if price is None:
         return True
-    return int(digits) <= max_price
+    return price <= max_price
 
 
 def request_delay() -> float:

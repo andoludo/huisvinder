@@ -47,7 +47,12 @@ class DeImmoMakelaar(BaseSource):
                 continue
 
             estate = publication.get("Estate") or {}
-            address = estate.get("Address") or {}
+            address_data = estate.get("Address") or {}
+            street = " ".join(
+                str(part) for part in (address_data.get("Street"), address_data.get("HouseNumber")) if part
+            )
+            zip_city = " ".join(str(part) for part in (address_data.get("ZipCode"), address_data.get("City")) if part)
+            address = ", ".join(part for part in (street, zip_city) if part) or None
 
             results.append(
                 {
@@ -55,7 +60,9 @@ class DeImmoMakelaar(BaseSource):
                     "created_at": datetime.date.today(),
                     "link": link,
                     "category": _as_str(estate.get("Category")),
-                    "city": _as_str(address.get("City")),
+                    "city": _as_str(address_data.get("City")),
+                    "address": address,
+                    "epc": _as_str(estate.get("EnergyClassValue")),
                     "display_price": display_price,
                     "bedrooms": _as_str(estate.get("NumberOfBedrooms")),
                     "living_area": _as_str(estate.get("HabitableArea")),

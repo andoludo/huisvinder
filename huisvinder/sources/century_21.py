@@ -4,7 +4,7 @@ import re
 from bs4 import Tag
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup
+from huisvinder.utils import get_static_soup, normalize_epc
 from huisvinder.types import Sources
 
 MAX_PRICE = 400000
@@ -40,7 +40,11 @@ class Century21(BaseSource):
                 continue
             link = str(link_tag["href"])
 
-            price = city = category = None
+            price = city = address = category = epc = None
+            epc_img = card.select_one("img[src*='/epc/']")
+            if epc_img is not None:
+                stem = str(epc_img["src"]).rsplit("/", 1)[-1].removesuffix(".png")
+                epc = normalize_epc(stem.removeprefix("epc-"))
             headings = [
                 heading
                 for heading in card.select(".elementor-heading-title")
@@ -55,6 +59,7 @@ class Century21(BaseSource):
                     continue
                 address_match = ADDRESS_PATTERN.search(text)
                 if address_match:
+                    address = text
                     city = address_match.group(2).strip().title()
                 elif category is None:
                     category = text
@@ -69,6 +74,8 @@ class Century21(BaseSource):
                     "link": link,
                     "category": category,
                     "city": city,
+                    "address": address,
+                    "epc": epc,
                     "display_price": price,
                     "bedrooms": _field_value(card, "bedrooms"),
                     "living_area": _field_value(card, "surface_total"),

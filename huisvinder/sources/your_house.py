@@ -3,7 +3,7 @@ import re
 from urllib.parse import urljoin
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup, within_budget
+from huisvinder.utils import get_static_soup, normalize_epc, within_budget
 from huisvinder.types import Sources
 
 MAX_PRICE = 400000
@@ -41,12 +41,16 @@ class YourHouseVastgoed(BaseSource):
             if not within_budget(price, MAX_PRICE):
                 continue
 
-            city = None
+            city = address = None
             address_tag = card.select_one("p.address")
             if address_tag:
-                city_match = CITY_PATTERN.search(address_tag.get_text(" ", strip=True))
+                address = address_tag.get_text(" ", strip=True)
+                city_match = CITY_PATTERN.search(address)
                 if city_match:
                     city = city_match.group(1).strip()
+
+            epc_img = card.select_one("img.energy-label")
+            epc = normalize_epc(epc_img.get("alt")) if epc_img else None
 
             slug_match = SLUG_PATTERN.search(link)
             category = slug_match.group(1).replace("-", " ") if slug_match else None
@@ -69,6 +73,8 @@ class YourHouseVastgoed(BaseSource):
                     "link": link,
                     "category": category,
                     "city": city,
+                    "address": address,
+                    "epc": epc,
                     "display_price": price,
                     "bedrooms": bedrooms,
                     "surface_ground": surface_ground,

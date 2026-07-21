@@ -45,6 +45,10 @@ class Immoweb(BaseSource):
                 f"/{locality.lower()}/{postal_code}/{classified_id}"
             )
 
+            street = location.get("street")
+            number = location.get("number")
+            address = " ".join(str(part) for part in (street, number) if part) or None
+
             sale = (result.get("transaction") or {}).get("sale") or {}
             price = sale.get("price")
             display_price = f"€ {price:,.0f}".replace(",", ".") if price else None
@@ -56,6 +60,7 @@ class Immoweb(BaseSource):
                     "link": link,
                     "category": property_type.capitalize(),
                     "city": locality,
+                    "address": address,
                     "display_price": display_price,
                     "description": _as_str(property_.get("title")),
                     "bedrooms": _as_str(property_.get("bedroomCount")),
