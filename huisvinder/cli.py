@@ -2,13 +2,13 @@ import csv
 import json
 import logging
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import typer
 
 from huisvinder.database.crud import HuisVinderDb
-from huisvinder.models import BaseHouse, BaseSource
-from huisvinder.services import SOURCES, collect_houses, add_property_sales_record
+from huisvinder.models import BaseHouse, BaseSource, Simulation
+from huisvinder.services import SOURCES, add_property_sales_record, collect_houses, create_report
 
 app = typer.Typer(help="Scrape Leuven-area real-estate listings.", no_args_is_help=True)
 logger = logging.getLogger(__name__)
@@ -87,6 +87,31 @@ def fetch(
     houses = collect_houses(with_details=True)
     HuisVinderDb(database_path=database).add_houses(houses)
     logger.info("Stored %d available listings in %s", len(houses), database)
+
+
+@app.command()
+def report(
+    database: Annotated[Path, typer.Argument(help="SQLite database with listings and Statbel statistics.")],
+    budget: Annotated[float | None, typer.Option(help="Purchase budget in EUR.")] = None,
+    locality: Annotated[
+        list[str] | None,
+        typer.Option("--locality", "-l", help="Municipality to compare (repeatable); default: simulation defaults."),
+    ] = None,
+    min_year: Annotated[int | None, typer.Option(help="First Statbel year to include.")] = None,
+    output: Annotated[Path | None, typer.Option(help="Output HTML path; default: next to the database.")] = None,
+    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable debug logging.")] = False,
+) -> None:
+    """Write the interactive budget/EPC HTML report for a database."""
+    _configure_logging(verbose)
+    overrides: dict[str, Any] = {}
+    if budget is not None:
+        overrides["budget"] = budget
+    if locality:
+        overrides["localities"] = [name.upper() for name in locality]
+    if min_year is not None:
+        overrides["min_year"] = min_year
+    path = create_report(database, Simulation(**overrides), output_path=output)
+    logger.info("Report written to %s", path)
 
 
 @app.command()

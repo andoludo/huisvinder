@@ -1,15 +1,17 @@
 import logging
+from collections.abc import Sequence
 from functools import cached_property
 from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import Engine, create_engine, insert
-from sqlmodel import Session
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+from sqlmodel import Session, col, select
+
 from huisvinder.database.schemas import BaseHouseORM, PropertySalesRecordORM
 from huisvinder.database.scripts.upgrade import upgrade
-from huisvinder.models import BaseHouse, PropertySalesRecord
+from huisvinder.models import BaseHouse, PropertyCategory, PropertySalesRecord
 
 logger = logging.getLogger(__name__)
 
@@ -53,3 +55,22 @@ class HuisVinderDb(BaseModel):
             for start in range(0, len(records_), BATCH_SIZE):
                 session.exec(stmt, params=records_[start : start + BATCH_SIZE])
             session.commit()
+
+    def get_sales_records(self, localities: Sequence[str], min_year: int) -> list[PropertySalesRecordORM]:
+        """Statbel rows for the given municipalities from min_year onwards."""
+        with Session(self._engine) as session:
+            stmt = select(PropertySalesRecordORM).where(
+                col(PropertySalesRecordORM.locality).in_(localities),
+                PropertySalesRecordORM.year >= min_year,
+            )
+            return list(session.exec(stmt).all())
+
+    def get_priced_epc_houses(self) -> list[BaseHouseORM]:
+        """House listings (category 'house' only) that carry both a price and an EPC value."""
+        with Session(self._engine) as session:
+            stmt = select(BaseHouseORM).where(
+                col(BaseHouseORM.price).is_not(None),
+                col(BaseHouseORM.epc).is_not(None),
+                BaseHouseORM.category == PropertyCategory.HOUSE,
+            )
+            return list(session.exec(stmt).all())

@@ -401,3 +401,9 @@ class PropertySalesRecord(BaseModel):
             if not q1 <= median <= q3:
                 raise ValueError(f"{segment}: quartiles out of order (q1={q1}, median={median}, q3={q3})")
         return self
+
+
+class Simulation(BaseModel):
+    budget: float = 400000
+    localities: list[str] = ["BIERBEEK","HOLSBEEK","LEUVEN","OUD-HEVERLEE","LUBBEEK"]
+    min_year: int = 2023
