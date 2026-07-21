@@ -79,6 +79,17 @@ def test_pull_rejects_unknown_source(tmp_path: Path):
     assert "Unknown source" in result.output
 
 
+def test_fetch_requires_only_database_path(tmp_path: Path):
+    db = tmp_path / "all.db"
+    with ExitStack() as stack:
+        patched_sources(stack, [HOUSE])
+        stack.enter_context(patch("huisvinder.services.enrich_houses"))
+        result = runner.invoke(app, ["fetch", str(db)])
+    assert result.exit_code == 0, result.output
+    with sqlmodel.Session(HuisVinderDb(database_path=db)._engine) as session:
+        assert len(session.query(BaseHouseORM).all()) == 1  # upserted by PK
+
+
 def test_sources_command_lists_all():
     result = runner.invoke(app, ["sources"])
     assert result.exit_code == 0

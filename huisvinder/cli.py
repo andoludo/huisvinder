@@ -71,6 +71,18 @@ def pull(
 
 
 @app.command()
+def fetch(
+    database: Annotated[Path, typer.Argument(help="SQLite database the listings are upserted into.")],
+    verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable debug logging.")] = False,
+) -> None:
+    """Fetch all houses from every source with full details into a database."""
+    _configure_logging(verbose)
+    houses = collect_houses(with_details=True)
+    HuisVinderDb(database_path=database).add_houses(houses)
+    logger.info("Stored %d available listings in %s", len(houses), database)
+
+
+@app.command()
 def sources() -> None:
     """List the supported listing sources."""
     _configure_logging(verbose=False)

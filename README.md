@@ -10,7 +10,13 @@ uv sync
 
 ## Usage
 
-Pull every listing that is currently still available on the market:
+Fetch every available listing from all sources, with full details, into a database — only the database path is needed:
+
+```sh
+uv run huisvinder fetch building.db
+```
+
+For more control, `pull` also writes an output file and can limit sources:
 
 ```sh
 uv run huisvinder pull
