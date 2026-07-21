@@ -1,4 +1,3 @@
-
 from sqlmodel import Field, SQLModel
 
 from huisvinder.models import BaseHouse, PropertySalesRecord

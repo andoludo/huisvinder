@@ -288,7 +288,6 @@ class BaseHouse(BaseModel):
         return self
 
 
-
 class BaseSource(BaseModel):
     name: Sources
     base_url: str
