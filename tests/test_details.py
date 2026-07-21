@@ -18,7 +18,8 @@ PLATFORM_CASES = [
         "dedijle.html",  # Zabun template with spec tables + JSON-LD
         "DeDijle",
         {
-            "epc": "137 kWh/m 2 /jaar",
+            "epc": 137,
+            "epc_is_estimated": False,
             "address": "Egenhovenweg 47 / 0301, 3001 Heverlee",
             "garden": None,
         },
@@ -26,26 +27,27 @@ PLATFORM_CASES = [
     (
         "century21.html",  # Omnicasa/Elementor with English labels
         "Century21",
-        {"epc": "F (559 kWh/m²/year)", "garage": "No", "garden": "Yes"},
+        {"epc": 559, "epc_is_estimated": False, "garage": "No", "garden": "Yes"},
     ),
     (
         "era.html",  # Drupal field wrappers + JSON-LD Residence
         "ERAVandendries",
         {
-            "epc": "B",
+            "epc": 150,
+            "epc_is_estimated": True,
             "address": "Karel van Lotharingenstraat 26 0101, 3000 Leuven",
         },
     ),
     (
         "immotime.html",  # WordPress/Avada spec tables
         "ImmoTime",
-        {"epc": "1009 kWh/m²", "address": "Molenstraat 38 Keerbergen"},
+        {"epc": 1009, "address": "Molenstraat 38 Keerbergen"},
     ),
     (
         "marnix.html",  # Zabun/Skarabee; JSON-LD holds the agency, not the
         "MarnixVastgoed",  # property, so the 'adres' label must win
         {
-            "epc": "730,00 kWh/(m² jaar)",
+            "epc": 730,
             "address": "Sint-Jorisstraat 66 Oorbeek",
             "garage": "Ja",
             "garden": "Ja",
@@ -81,7 +83,7 @@ def test_enrich_house_does_not_overwrite_existing_fields():
     soup = BeautifulSoup((DETAILS / "marnix.html").read_text(), "html.parser")
     house = make_house(epc="A+", address="Kept 1, 3000 Leuven")
     enrich_house(house, soup=soup)
-    assert house.epc == "A+"
+    assert house.epc == 0  # A+ band midpoint; already set, so not overwritten
     assert house.address == "Kept 1, 3000 Leuven"
     assert house.garage == "Ja"  # missing fields are still filled
 

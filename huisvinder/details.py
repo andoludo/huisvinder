@@ -13,7 +13,7 @@ from collections.abc import Callable
 
 from bs4 import BeautifulSoup, Tag
 
-from huisvinder.models import BaseHouse
+from huisvinder.models import BaseHouse, parse_epc_with_source
 from huisvinder.utils import get_static_soup
 
 logger = logging.getLogger(__name__)
@@ -130,7 +130,8 @@ def enrich_house(house: BaseHouse, soup: BeautifulSoup | Tag | None = None) -> N
         soup = get_static_soup(house.link)
     pairs = harvest_pairs(soup)  # type: ignore[arg-type]
     if house.epc is None:
-        house.epc = _lookup(pairs, EPC_LABELS)
+        # plain assignment skips the model's validators, so parse explicitly
+        house.epc, house.epc_is_estimated = parse_epc_with_source(_lookup(pairs, EPC_LABELS))
     if house.address is None:
         house.address = _json_ld_address(soup) or _lookup(pairs, ADDRESS_LABELS)  # type: ignore[arg-type]
     if house.garage is None:

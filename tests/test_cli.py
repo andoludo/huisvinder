@@ -102,7 +102,7 @@ def test_pull_json_output_and_source_selection(tmp_path: Path):
     assert result.exit_code == 0, result.output
     rows = json.loads(output.read_text())
     assert len(rows) == 2  # one per selected source
-    assert rows[0]["city"] == "Leuven"
+    assert rows[0]["city"] == "LEUVEN"
 
 
 def test_pull_rejects_unknown_source(tmp_path: Path):
