@@ -7,9 +7,9 @@ from pydantic import BaseModel, ConfigDict
 from sqlalchemy import Engine, create_engine, insert
 from sqlmodel import Session
 
-from huisvinder.database.schemas import BaseHouseORM
+from huisvinder.database.schemas import BaseHouseORM, PropertySalesRecordORM
 from huisvinder.database.scripts.upgrade import upgrade
-from huisvinder.models import BaseHouse
+from huisvinder.models import BaseHouse, PropertySalesRecord
 
 logger = logging.getLogger(__name__)
 
@@ -37,4 +37,17 @@ class HuisVinderDb(BaseModel):
             houses_ = [h.model_dump() for h in houses]
             stmt = insert(BaseHouseORM).prefix_with("OR REPLACE").values(houses_)
             session.exec(stmt)
+            session.commit()
+
+    def add_property_sales_records(self, records: list[PropertySalesRecord]) -> None:
+        """Upsert Statbel sales records on the (nis_code, locality, year, period) primary key."""
+        if not records:
+            return
+        with Session(self._engine) as session:
+            records_ = [r.model_dump() for r in records]
+            # executemany in one transaction: a single multi-VALUES statement for
+            # ~37k rows x 20 columns would exceed SQLite's bind-parameter limit
+            stmt = insert(PropertySalesRecordORM).prefix_with("OR REPLACE")
+            for start in range(0, len(records_), BATCH_SIZE):
+                session.exec(stmt, params=records_[start : start + BATCH_SIZE])
             session.commit()
