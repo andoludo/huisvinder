@@ -9,10 +9,12 @@ from pydantic import ValidationError
 from huisvinder.database.crud import HuisVinderDb
 from huisvinder.details import enrich_houses
 from huisvinder.models import BaseHouse, BaseSource, PropertySalesRecord
+from huisvinder.sources.bond_immo import BondImmo
 from huisvinder.sources.bvm_vastgoed import BVMVastgoed
 from huisvinder.sources.century_21 import Century21
 from huisvinder.sources.covas import CovasImmo
 from huisvinder.sources.de_immo_makelaar import DeImmoMakelaar
+from huisvinder.sources.era_leuven import ERALeuven
 from huisvinder.sources.era_vandendries import ERAVandendries
 from huisvinder.sources.homies import Homies
 from huisvinder.sources.immo_gve import ImmoGVE
@@ -29,6 +31,7 @@ from huisvinder.sources.marnix_vastgoed import MarnixVastgoed
 from huisvinder.sources.realium import Realium
 from huisvinder.sources.realo import Realo
 from huisvinder.sources.ter_duin import ImmoTerDuin
+from huisvinder.sources.vastgoed_sv import VastgoedSV
 from huisvinder.sources.we_invest import WeInvest
 from huisvinder.sources.your_house import YourHouseVastgoed
 
@@ -57,6 +60,9 @@ SOURCES: list[type[BaseSource]] = [
     ERAVandendries,
     Realo,
     Homies,
+    VastgoedSV,
+    BondImmo,
+    ERALeuven,
 ]
 
 

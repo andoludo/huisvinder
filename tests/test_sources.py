@@ -18,6 +18,8 @@ from huisvinder.sources.bvm_vastgoed import BVMVastgoed
 from huisvinder.sources.century_21 import Century21
 from huisvinder.sources.covas import CovasImmo
 from huisvinder.sources.de_immo_makelaar import DeImmoMakelaar
+from huisvinder.sources.bond_immo import BondImmo
+from huisvinder.sources.era_leuven import ERALeuven
 from huisvinder.sources.era_vandendries import ERAVandendries
 from huisvinder.sources.homies import Homies
 from huisvinder.sources.immo_gve import ImmoGVE
@@ -34,6 +36,7 @@ from huisvinder.sources.marnix_vastgoed import MarnixVastgoed
 from huisvinder.sources.realium import Realium
 from huisvinder.sources.realo import Realo
 from huisvinder.sources.ter_duin import ImmoTerDuin
+from huisvinder.sources.vastgoed_sv import VastgoedSV
 from huisvinder.sources.we_invest import WeInvest
 from huisvinder.sources.your_house import YourHouseVastgoed
 from huisvinder.utils import normalize_status, parse_price, within_budget
@@ -99,7 +102,7 @@ CASES = [
         "janstas.html",
         cards_in_fixture=6,  # 3 sold cards without link/price are skipped
         expected_count=3,
-        n_page_urls=1,
+        n_page_urls=2,  # houses+apartments query plus the surrounding-villages one
         first={
             "display_price": "€ 185.000",
             "price": 185000.0,
@@ -307,7 +310,7 @@ CASES = [
     ),
     SourceCase(
         ERAVandendries,
-        "huisvinder.sources.era_vandendries",
+        "huisvinder.sources._era",
         "era.html",
         cards_in_fixture=6,
         expected_count=6,
@@ -394,6 +397,61 @@ CASES = [
             "category": "house",
             "bedrooms": 3,
             "living_area": "86 m²",
+        },
+    ),
+    SourceCase(
+        VastgoedSV,
+        "huisvinder.sources._whise",
+        "vastgoedsv.html",
+        cards_in_fixture=6,
+        expected_count=6,
+        n_page_urls=1,
+        first={
+            "link": "https://www.vastgoedsv.be/nl/bouwgrond-te-koop-in-rotselaar/7789805",
+            "display_price": "€ 225.000",
+            "price": 225000.0,
+            "city": "ROTSELAAR",
+            "category": "other",
+            "status": "available",
+            "surface_ground": "730m²",
+        },
+    ),
+    SourceCase(
+        BondImmo,
+        "huisvinder.sources._whise",
+        "bondimmo.html",
+        cards_in_fixture=6,  # 5 sold cards share the generic references link
+        expected_count=1,
+        n_page_urls=4,
+        first={
+            "link": "https://www.bondimmo.be/nl/huis-te-koop-in-kessel-lo/7730593",
+            "display_price": "€ 235.000",
+            "price": 235000.0,
+            "city": "KESSEL-LO",
+            "category": "house",
+            "status": "available",
+            "bedrooms": 3,
+            "living_area": "86m²",
+            "surface_ground": "71m²",
+        },
+    ),
+    SourceCase(
+        ERALeuven,
+        "huisvinder.sources.era_leuven",
+        "eraleuven.json",
+        cards_in_fixture=4,
+        expected_count=4,
+        n_page_urls=3,
+        json_based=True,
+        statuses={"available": 2, "option": 2},
+        first={
+            "display_price": "€ 460 000",
+            "price": 460000.0,
+            "city": "LEUVEN",
+            "address": "Casinolaan 48, 3018 Leuven",
+            "category": "house",
+            "status": "option",
+            "bedrooms": 3,
         },
     ),
     SourceCase(

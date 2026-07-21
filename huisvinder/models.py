@@ -300,15 +300,18 @@ class BaseSource(BaseModel):
     def _get_page_data(self, page_url: str) -> list[BaseHouse]: ...
 
     def get_base_house(self) -> list[BaseHouse]:
-        base_houses = []
+        # dedup by link: overlapping search queries and pagination echoes
+        # would otherwise repeat listings within one source run
+        base_houses: dict[str, BaseHouse] = {}
         for page_url in self._get_page_urls():
             try:
                 page_data = self._get_page_data(page_url)
             except Exception:
                 logger.warning("Failed to scrape %s page %s", self.name, page_url)
                 continue
-            base_houses.extend(page_data)
-        return base_houses
+            for house in page_data:
+                base_houses.setdefault(house.link, house)
+        return list(base_houses.values())
 
 
 _MISSING = {"", ".", "..", "...", "-", ":", "n.b.", "NA"}

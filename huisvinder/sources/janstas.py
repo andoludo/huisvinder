@@ -9,10 +9,16 @@ from huisvinder.types import Sources
 class JanStas(BaseSource):
     name: Sources = "JanStas"
     base_url: str = "https://immojanstas.be/nl/kopen?type=1&type=3"
+    # apartments in the surrounding villages, selected by Whise city ids
+    apartments_url: str = (
+        "https://immojanstas.be/nl/kopen?type=3&city=1000874&city=1000875&city=1000808"
+        "&city=1000864&city=1000876&city=1000888&city=1000889&city=1000893"
+    )
 
     def _get_page_urls(self) -> list[str]:
         return [
             self.base_url,
+            self.apartments_url,
         ]
 
     def _get_page_data(self, page_url: str) -> list[BaseHouse]:
