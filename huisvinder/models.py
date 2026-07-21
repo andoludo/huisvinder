@@ -212,6 +212,48 @@ def parse_epc(value: Any) -> Any:
 EpcValue = Annotated[int | None, BeforeValidator(parse_epc)]
 
 
+# "None" arrives as a literal string in this data, not as Python None
+_BEDROOMS_MISSING = {"", "-", "n/a", "nvt", "onbekend", "none", "null"}
+_BEDROOMS_RANGE = re.compile(r"(\d+)\s*(?:-|–|/|tot)\s*(\d+)")  # noqa: RUF001 -- ranges use a real en dash too
+_BEDROOMS_NUMBER = re.compile(r"\d+")
+BEDROOMS_SANITY_MAX = 25
+
+
+def parse_bedrooms(value: Any) -> Any:
+    """Parse a raw bedroom count into an integer.
+
+    Stages, in order: (1) an int passes through unchanged and other non-strings
+    are left for Pydantic to reject, (2) whitespace is normalised, (3) missing
+    markers (including the literal strings 'None'/'null') become None, (4) a
+    range ('1 - 2', '1 tot 2', '1/2') keeps its lower bound, (5) otherwise the
+    first integer wins and trailing Dutch text is discarded, (6) anything else
+    becomes None and is logged at debug level. Counts outside 0..25 are almost
+    certainly parse errors and become None; 0 is a valid count (a studio has no
+    separate bedroom) and 14-bedroom student houses are real.
+    """
+    if not isinstance(value, str):
+        return value
+    text = _WHITESPACE_RUN.sub(" ", value.replace("\xa0", " ")).strip()
+    if text.casefold() in _BEDROOMS_MISSING:
+        return None
+    if range_match := _BEDROOMS_RANGE.search(text):
+        return _bounded_bedrooms(min(int(range_match.group(1)), int(range_match.group(2))), value)
+    if number_match := _BEDROOMS_NUMBER.search(text):
+        return _bounded_bedrooms(int(number_match.group()), value)
+    logger.debug("Unparseable bedroom count %r, storing None", value)
+    return None
+
+
+def _bounded_bedrooms(count: int, raw: str) -> int | None:
+    if 0 <= count <= BEDROOMS_SANITY_MAX:
+        return count
+    logger.debug("Bedroom count %r outside the [0, %d] sanity bound, storing None", raw, BEDROOMS_SANITY_MAX)
+    return None
+
+
+BedroomCount = Annotated[int | None, BeforeValidator(parse_bedrooms)]
+
+
 class BaseHouse(BaseModel):
     source: Sources
     created_at: datetime
@@ -222,7 +264,7 @@ class BaseHouse(BaseModel):
     address: str | None = None
     category: Category = None
     description: str | None = None
-    bedrooms: str | None = None
+    bedrooms: BedroomCount = None
     living_area: str | None = None
     surface_ground: str | None = None
     epc: EpcValue = None

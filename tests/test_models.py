@@ -8,6 +8,7 @@ from huisvinder.models import (
     PropertyCategory,
     classify_category,
     normalise_city,
+    parse_bedrooms,
     parse_epc,
     parse_epc_with_source,
 )
@@ -221,6 +222,54 @@ def test_epc_roundtrip_keeps_the_estimated_flag():
 def test_non_numeric_epc_is_rejected_by_pydantic():
     with pytest.raises(ValidationError):
         make_house(epc=["269"])
+
+
+BEDROOM_CASES = [
+    ("1", 1),
+    ("4", 4),
+    ("0", 0),  # a studio genuinely has zero bedrooms
+    ("14", 14),  # large student houses are real; the ceiling must stay >= 25
+    ("None", None),  # the literal string, as scraped
+    ("none", None),
+    ("null", None),
+    ("1 slpks.", 1),
+    ("1 slpkr.", 1),
+    ("2 slpkr.", 2),
+    ("5 slpkr.", 5),
+    ("1 slaapkamer(s)", 1),
+    ("10 slaapkamer(s)", 10),
+    ("1 - 2 slpkr.", 1),  # range keeps the lower bound
+    ("1 – 2 slpkr.", 1),  # en dash range  # noqa: RUF001
+    ("1 tot 3 slaapkamers", 1),
+    ("2/3 slpkr.", 2),
+    ("  3   slpkr.  ", 3),
+    ("-", None),
+    ("nvt", None),
+    ("onbekend", None),
+    ("", None),
+    ("26", None),  # above the sanity ceiling
+    ("gibberish", None),
+]
+
+
+@pytest.mark.parametrize(("raw", "expected"), BEDROOM_CASES)
+def test_parse_bedrooms(raw, expected):
+    assert parse_bedrooms(raw) == expected
+
+
+@pytest.mark.parametrize("count", [0, 3, 14])
+def test_parse_bedrooms_is_idempotent_on_integers(count):
+    assert parse_bedrooms(count) == count
+    assert make_house(bedrooms=count).bedrooms == count
+
+
+def test_zero_bedrooms_survives_the_model():
+    assert make_house(bedrooms="0").bedrooms == 0
+
+
+def test_non_numeric_bedrooms_is_rejected_by_pydantic():
+    with pytest.raises(ValidationError):
+        make_house(bedrooms=["3"])
 
 
 def make_house(**kwargs) -> BaseHouse:

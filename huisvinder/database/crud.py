@@ -35,7 +35,7 @@ class HuisVinderDb(BaseModel):
             return
         payload = [h.model_dump() for h in houses]
         stmt = sqlite_insert(BaseHouseORM).on_conflict_do_nothing(
-            index_elements=["url"],  # replace with the actual unique key
+            index_elements=["source", "link"],  # the basehouse primary key
         )
         with Session(self._engine) as session:
             session.execute(stmt, payload)
