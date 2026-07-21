@@ -30,6 +30,7 @@ from huisvinder.sources.immowonen import ImmoWonen
 from huisvinder.sources.janstas import JanStas
 from huisvinder.sources.marnix_vastgoed import MarnixVastgoed
 from huisvinder.sources.realium import Realium
+from huisvinder.sources.realo import Realo
 from huisvinder.sources.ter_duin import ImmoTerDuin
 from huisvinder.sources.we_invest import WeInvest
 from huisvinder.sources.your_house import YourHouseVastgoed
@@ -336,6 +337,22 @@ CASES = [
             "category": "Apartment",
             "bedrooms": "2",
             "living_area": "75",
+        },
+    ),
+    SourceCase(
+        Realo,
+        "huisvinder.sources.realo",
+        "realo.html",
+        cards_in_fixture=6,  # 2 ad/placeholder tiles without data-href are skipped
+        expected_count=4,
+        n_page_urls=1,
+        first={
+            "link": "https://www.realo.be/nl/jozef-pierrestraat-86-3010-kessel-lo/3066883?l=2137809537",
+            "display_price": "€ 235.000",
+            "city": "3010 Kessel-Lo",
+            "category": "Huis",
+            "bedrooms": "3",
+            "living_area": "86 m²",
         },
     ),
     SourceCase(

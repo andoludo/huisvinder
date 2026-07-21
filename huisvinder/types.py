@@ -21,4 +21,5 @@ Sources = Literal[
     "ImmoGVE",
     "WeInvest",
     "ERAVandendries",
+    "Realo",
 ]

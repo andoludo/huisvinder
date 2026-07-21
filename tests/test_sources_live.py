@@ -18,6 +18,7 @@ from huisvinder.sources.immoweb import Immoweb
 from huisvinder.sources.janstas import JanStas
 from huisvinder.sources.marnix_vastgoed import MarnixVastgoed
 from huisvinder.sources.realium import Realium
+from huisvinder.sources.realo import Realo
 from huisvinder.sources.ter_duin import ImmoTerDuin
 from huisvinder.sources.we_invest import WeInvest
 from huisvinder.sources.your_house import YourHouseVastgoed
@@ -44,6 +45,7 @@ LIVE_SOURCES = [
     ERAVandendries,
     Immoweb,
     Immovlan,
+    Realo,
 ]
 
 
