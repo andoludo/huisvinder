@@ -2,11 +2,10 @@ import datetime
 
 from bs4 import Tag
 
+from huisvinder.config import MAX_PRICE
 from huisvinder.models import BaseSource, BaseHouse
 from huisvinder.utils import get_static_soup, normalize_epc
 from huisvinder.types import Sources
-
-MAX_PRICE = 400000
 
 
 def _card_text(card: Tag, selector: str) -> str | None:

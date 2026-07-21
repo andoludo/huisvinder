@@ -3,11 +3,10 @@ from urllib.parse import urljoin
 
 from bs4 import Tag
 
+from huisvinder.config import MAX_PRICE
 from huisvinder.models import BaseSource, BaseHouse
 from huisvinder.utils import get_static_soup, normalize_epc
 from huisvinder.types import Sources
-
-MAX_PRICE = 400000
 
 
 def _icon_sibling_text(card: Tag, svg_class: str) -> str | None:

@@ -3,6 +3,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from huisvinder.database.crud import HuisVinderDb
+from huisvinder.details import enrich_houses
 from huisvinder.models import BaseHouse, BaseSource
 from huisvinder.sources.bvm_vastgoed import BVMVastgoed
 from huisvinder.sources.century_21 import Century21
@@ -55,8 +56,12 @@ SOURCES: list[type[BaseSource]] = [
 
 def collect_houses(
     source_classes: Sequence[type[BaseSource]] | None = None,
+    with_details: bool = False,
 ) -> list[BaseHouse]:
-    """Scrape every source and return the still-available listings."""
+    """Scrape every source and return the still-available listings.
+
+    With with_details, each listing's detail page is also fetched to fill
+    missing epc/address/garage/garden fields (one extra request per listing)."""
     houses: list[BaseHouse] = []
     for source_class in source_classes if source_classes is not None else SOURCES:
         # mypy sees the abstract base; every registered subclass is concrete
@@ -69,6 +74,8 @@ def collect_houses(
             continue
         logger.info("%s: %d available listings", source.name, len(found))
         houses.extend(found)
+    if with_details:
+        enrich_houses(houses)
     return houses
 
 

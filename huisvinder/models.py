@@ -24,6 +24,8 @@ class BaseHouse(BaseModel):
     living_area: str | None = None
     surface_ground: str | None = None
     epc: str | None = None
+    garage: str | None = None
+    garden: str | None = None
 
     @model_validator(mode="after")
     def _derive_price(self) -> "BaseHouse":

@@ -52,12 +52,19 @@ def pull(
         list[str] | None,
         typer.Option("--source", "-s", help="Only pull these sources (repeatable); default: all."),
     ] = None,
+    details: Annotated[
+        bool,
+        typer.Option(
+            "--details/--no-details",
+            help="Also fetch each listing's detail page for epc/address/garage/garden.",
+        ),
+    ] = True,
     verbose: Annotated[bool, typer.Option("--verbose", "-v", help="Enable debug logging.")] = False,
 ) -> None:
     """Pull all houses currently still available on the market."""
     _configure_logging(verbose)
     source_classes = _resolve_sources(source) if source else None
-    houses = collect_houses(source_classes)
+    houses = collect_houses(source_classes, with_details=details)
     HuisVinderDb(database_path=db).add_houses(houses)
     _write_output(houses, output)
     logger.info("Wrote %d available listings to %s (database: %s)", len(houses), output, db)

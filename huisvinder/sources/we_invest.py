@@ -1,11 +1,11 @@
 import datetime
 from typing import Any
 
+from huisvinder.config import MAX_PRICE
 from huisvinder.models import BaseSource, BaseHouse
 from huisvinder.utils import get_json, normalize_epc
 from huisvinder.types import Sources
 
-MAX_PRICE = 400000
 LEUVEN_AGENCY_ID = 33
 PAGE_SIZE = 25
 

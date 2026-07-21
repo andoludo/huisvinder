@@ -36,7 +36,7 @@ def test_pull_writes_csv_and_database(tmp_path: Path):
     output = tmp_path / "houses.csv"
     with ExitStack() as stack:
         patched_sources(stack, [HOUSE])
-        result = runner.invoke(app, ["pull", "--db", str(db), "--output", str(output)])
+        result = runner.invoke(app, ["pull", "--db", str(db), "--output", str(output), "--no-details"])
     assert result.exit_code == 0, result.output
 
     rows = list(csv.DictReader(output.open()))
@@ -54,7 +54,18 @@ def test_pull_json_output_and_source_selection(tmp_path: Path):
         patched_sources(stack, [HOUSE])
         result = runner.invoke(
             app,
-            ["pull", "--db", str(tmp_path / "t.db"), "--output", str(output), "--source", "immoweb", "-s", "DeDijle"],
+            [
+                "pull",
+                "--db",
+                str(tmp_path / "t.db"),
+                "--output",
+                str(output),
+                "--source",
+                "immoweb",
+                "-s",
+                "DeDijle",
+                "--no-details",
+            ],
         )
     assert result.exit_code == 0, result.output
     rows = json.loads(output.read_text())

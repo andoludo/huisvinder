@@ -2,11 +2,11 @@ import datetime
 import re
 from urllib.parse import urljoin
 
+from huisvinder.config import MAX_PRICE
 from huisvinder.models import BaseSource, BaseHouse
 from huisvinder.utils import get_static_soup, normalize_epc, within_budget
 from huisvinder.types import Sources
 
-MAX_PRICE = 400000
 CITY_PATTERN = re.compile(r"\d{4}\s+(.+)$")
 AREA_PATTERN = re.compile(r"([\d.,]+\s*m²)")
 SLUG_PATTERN = re.compile(r"/aanbod/\d+/([a-z-]+?)-(?:te|optie)-koop")
