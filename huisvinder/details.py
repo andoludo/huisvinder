@@ -68,7 +68,7 @@ def harvest_pairs(soup: BeautifulSoup) -> dict[str, str]:
     pairs: dict[str, str] = {}
 
     def add(label: str, value: str) -> None:
-        label, value = _clean_label(label), value.strip()
+        label, value = _clean_label(label), " ".join(value.split())
         if label and value and len(label) < 40 and len(value) < 100:
             pairs.setdefault(label, value)
 
