@@ -9,7 +9,6 @@ class BaseHouseORM(SQLModel, BaseHouse, table=True):
     __tablename__ = "basehouse"
     # the ORM columns store the Literal and the category enum as plain TEXT
     source: str = Field(index=True, primary_key=True)  # type: ignore[assignment]
-    created_at: datetime = Field(primary_key=True, index=True)
     link: str = Field(primary_key=True, index=True)
     category: str | None = Field(default=None)  # type: ignore[assignment]
 

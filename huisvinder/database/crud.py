@@ -6,7 +6,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import Engine, create_engine, insert
 from sqlmodel import Session
-
+from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from huisvinder.database.schemas import BaseHouseORM, PropertySalesRecordORM
 from huisvinder.database.scripts.upgrade import upgrade
 from huisvinder.models import BaseHouse, PropertySalesRecord
@@ -33,10 +33,12 @@ class HuisVinderDb(BaseModel):
     def add_houses(self, houses: list[BaseHouse]) -> None:
         if not houses:
             return
+        payload = [h.model_dump() for h in houses]
+        stmt = sqlite_insert(BaseHouseORM).on_conflict_do_nothing(
+            index_elements=["url"],  # replace with the actual unique key
+        )
         with Session(self._engine) as session:
-            houses_ = [h.model_dump() for h in houses]
-            stmt = insert(BaseHouseORM).prefix_with("OR REPLACE").values(houses_)
-            session.exec(stmt)
+            session.execute(stmt, payload)
             session.commit()
 
     def add_property_sales_records(self, records: list[PropertySalesRecord]) -> None:
