@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 from bs4 import Tag
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup, normalize_epc
+from huisvinder.utils import get_static_soup, normalize_epc, normalize_status
 from huisvinder.types import Sources
 
 
@@ -59,6 +59,9 @@ class DeDijle(BaseSource):
             epc_img = prop.select_one("img.energy-label")
             epc = normalize_epc(epc_img.get("alt")) if epc_img else None
 
+            badge = prop.select_one("div.lbl")
+            status = normalize_status(badge.get_text(strip=True) if badge else None)
+
             loc_tag = prop.select_one(".estate-info-location .location")
             if loc_tag:
                 locality = loc_tag.get_text(strip=True)
@@ -76,6 +79,7 @@ class DeDijle(BaseSource):
                     "bedrooms": bedrooms,
                     "living_area": living_area,
                     "epc": epc,
+                    "status": status,
                 }
             )
         return [BaseHouse.model_validate(r) for r in results]

@@ -3,7 +3,7 @@ from urllib.parse import urljoin
 
 from huisvinder.config import MAX_PRICE
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup, within_budget
+from huisvinder.utils import get_static_soup, normalize_status, within_budget
 from huisvinder.types import Sources
 
 
@@ -29,12 +29,18 @@ class ImmoWonen(BaseSource):
                 continue
             link = urljoin("https://www.immowonen.be/", str(link_tag["href"]))
 
+            # under-option cards show an "Optie" overlay and an empty price
+            badge = card.select_one("div.marquee.marquee-2")
+            status = normalize_status(badge.get_text(strip=True) if badge else None)
+
             price_tag = card.select_one(".prop-price")
-            price = price_tag.get_text(strip=True) if price_tag else None
-            if not price or price.lower() == "verkocht":
+            price = (price_tag.get_text(strip=True) if price_tag else None) or None
+            if price and price.lower() == "verkocht":
+                continue
+            if price is None and status != "option":
                 continue
             # the search form is POST-only, so filter client-side
-            if not within_budget(price, MAX_PRICE):
+            if price and not within_budget(price, MAX_PRICE):
                 continue
 
             city = category = None
@@ -56,6 +62,7 @@ class ImmoWonen(BaseSource):
                     "category": category,
                     "city": city,
                     "display_price": price,
+                    "status": status,
                     "description": description,
                 }
             )

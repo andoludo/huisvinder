@@ -5,7 +5,7 @@ from bs4 import Tag
 
 from huisvinder.config import MAX_PRICE
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup, within_budget
+from huisvinder.utils import get_static_soup, normalize_status, within_budget
 from huisvinder.types import Sources
 
 BROKER_ID = 6000184  # ERA Vandendries (Leuven area offices)
@@ -41,6 +41,8 @@ class ERAVandendries(BaseSource):
             if not within_budget(price, MAX_PRICE):
                 continue
 
+            status = normalize_status(_card_text(card, ".campaign-field--flag"))
+
             city = None
             address = _card_text(card, ".field--address")
             if address:
@@ -63,6 +65,7 @@ class ERAVandendries(BaseSource):
                     "city": city,
                     "address": address,
                     "display_price": price,
+                    "status": status,
                     "bedrooms": _card_text(card, ".field--bedrooms"),
                     "living_area": _card_text(card, ".field--habitable-space"),
                     "surface_ground": _card_text(card, ".field--ground-share"),

@@ -3,7 +3,7 @@ from urllib.parse import urljoin
 
 from huisvinder.config import MAX_PRICE
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup, within_budget
+from huisvinder.utils import get_static_soup, normalize_status, within_budget
 from huisvinder.types import Sources
 
 
@@ -43,6 +43,9 @@ class CovasImmo(BaseSource):
                 category = category or None
                 city = city or None
 
+            badge = card.select_one("div.product-thumbnail-label-option")
+            status = normalize_status(badge.get_text(strip=True) if badge else None)
+
             bedrooms = living_area = None
             for li in card.select(".product-block li"):
                 text = li.get_text(strip=True)
@@ -58,6 +61,7 @@ class CovasImmo(BaseSource):
                     "link": link,
                     "category": category,
                     "city": city,
+                    "status": status,
                     "display_price": price,
                     "bedrooms": bedrooms,
                     "living_area": living_area,

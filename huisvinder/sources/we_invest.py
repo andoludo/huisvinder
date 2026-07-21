@@ -3,7 +3,7 @@ from typing import Any
 
 from huisvinder.config import MAX_PRICE
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_json, normalize_epc
+from huisvinder.utils import get_json, normalize_epc, normalize_status
 from huisvinder.types import Sources
 
 LEUVEN_AGENCY_ID = 33
@@ -57,6 +57,7 @@ class WeInvest(BaseSource):
                     "category": category,
                     "city": city,
                     "epc": normalize_epc(_as_str(property_.get("energyScore"))),
+                    "status": normalize_status(property_.get("status")),
                     "display_price": display_price,
                     "bedrooms": _as_str(property_.get("bedroomCount")),
                     "living_area": _as_str(property_.get("livableArea")),

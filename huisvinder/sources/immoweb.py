@@ -2,7 +2,7 @@ import datetime
 
 from huisvinder.config import MAX_PRICE
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_json
+from huisvinder.utils import get_json, normalize_status
 from huisvinder.types import Sources
 
 
@@ -48,6 +48,8 @@ class Immoweb(BaseSource):
             number = location.get("number")
             address = " ".join(str(part) for part in (street, number) if part) or None
 
+            status = normalize_status((result.get("flags") or {}).get("main"))
+
             sale = (result.get("transaction") or {}).get("sale") or {}
             price = sale.get("price")
             display_price = f"€ {price:,.0f}".replace(",", ".") if price else None
@@ -61,6 +63,7 @@ class Immoweb(BaseSource):
                     "city": locality,
                     "address": address,
                     "display_price": display_price,
+                    "status": status,
                     "description": _as_str(property_.get("title")),
                     "bedrooms": _as_str(property_.get("bedroomCount")),
                     "living_area": _as_str(property_.get("netHabitableSurface")),

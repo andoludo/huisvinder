@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 
 from huisvinder.config import MAX_PRICE
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_json, within_budget
+from huisvinder.utils import get_json, normalize_status, within_budget
 from huisvinder.types import Sources
 
 
@@ -32,8 +32,7 @@ class DeImmoMakelaar(BaseSource):
         results = []
         for publication in publications:
             transaction = publication.get("Transaction") or {}
-            if transaction.get("FlowStatus") == "Sold":
-                continue
+            status = normalize_status(transaction.get("FlowStatus"))
 
             url_path = publication.get("Url")
             if not url_path:
@@ -63,6 +62,7 @@ class DeImmoMakelaar(BaseSource):
                     "address": address,
                     "epc": _as_str(estate.get("EnergyClassValue")),
                     "display_price": display_price,
+                    "status": status,
                     "bedrooms": _as_str(estate.get("NumberOfBedrooms")),
                     "living_area": _as_str(estate.get("HabitableArea")),
                     "surface_ground": _as_str(estate.get("LandArea")),

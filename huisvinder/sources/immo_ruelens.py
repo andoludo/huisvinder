@@ -4,10 +4,8 @@ from bs4 import Tag
 
 from huisvinder.config import MAX_PRICE
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup, normalize_epc
+from huisvinder.utils import get_static_soup, normalize_epc, normalize_status
 from huisvinder.types import Sources
-
-SOLD_STICKERS = {"verkocht", "recent verkocht"}
 
 
 def _icon_value(card: Tag, icon_selector: str) -> str | None:
@@ -35,18 +33,13 @@ class ImmoRuelens(BaseSource):
         results = []
         for card in cards:
             sticker_tag = card.select_one(".spotlight__image__sticker")
-            sticker = sticker_tag.get_text(strip=True).lower() if sticker_tag else None
-            if sticker in SOLD_STICKERS:
-                continue
+            sticker = sticker_tag.get_text(strip=True) if sticker_tag else None
+            status = normalize_status(sticker)
 
             link_tag = card.select_one(".spotlight__content a")
             if link_tag is None:
                 continue
-            link_path = str(link_tag["href"])
-            # sold stock sometimes leaks in linking to /nl/verkocht/
-            if not link_path.startswith("/nl/te-koop/"):
-                continue
-            link = f"https://www.immoruelens.be{link_path}"
+            link = f"https://www.immoruelens.be{link_tag['href']}"
 
             price_tag = card.select_one(".spotlight__content__price")
             if price_tag is None:
@@ -73,6 +66,7 @@ class ImmoRuelens(BaseSource):
                     "category": category,
                     "city": city,
                     "display_price": price,
+                    "status": status,
                     "epc": epc,
                     "bedrooms": _icon_value(card, "i.fa-bed"),
                     "living_area": _icon_value(card, "i.fa-home"),

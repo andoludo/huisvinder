@@ -5,7 +5,7 @@ from bs4 import Tag
 
 from huisvinder.config import MAX_PRICE
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup, normalize_epc
+from huisvinder.utils import get_static_soup, normalize_epc, normalize_status
 from huisvinder.types import Sources
 
 
@@ -50,8 +50,16 @@ class ImmoHorst(BaseSource):
             epc_img = card.select_one("img.energy-label")
             epc = normalize_epc(epc_img.get("alt")) if epc_img else None
 
+            # the heading reads "<category> <status>", e.g. "Eengezinswoning Optie koop"
             category_tag = card.select_one(".info h3")
             category = " ".join(category_tag.get_text().split()) if category_tag else None
+            status = "available"
+            if category:
+                for suffix in ("Optie koop", "Te koop", "Verkocht", "Verhuurd"):
+                    if category.endswith(suffix):
+                        status = normalize_status(suffix)
+                        category = category.removesuffix(suffix).strip() or None
+                        break
 
             results.append(
                 {
@@ -63,6 +71,7 @@ class ImmoHorst(BaseSource):
                     "address": address,
                     "epc": epc,
                     "display_price": price,
+                    "status": status,
                     "bedrooms": _icon_sibling_text(card, "fa-bed"),
                     "living_area": _icon_sibling_text(card, "icon-surface"),
                 }

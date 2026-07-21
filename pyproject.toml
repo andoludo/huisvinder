@@ -101,3 +101,6 @@ ignore = [
     "S101", # pytest asserts
     "ANN", # test signatures need no annotations
 ]
+"huisvinder/cli.py" = [
+    "PLR0913", # a Typer command takes one parameter per CLI flag by design
+]

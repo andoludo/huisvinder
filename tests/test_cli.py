@@ -31,6 +31,38 @@ def patched_sources(stack: ExitStack, houses: list[BaseHouse]) -> None:
         stack.enter_context(patch.object(source_class, "get_base_house", return_value=houses))
 
 
+SOLD_HOUSE = BaseHouse(
+    source="Immoweb",
+    created_at=datetime.date.today(),
+    link="https://example.test/sold",
+    display_price="€ 250.000",
+    status="sold",
+)
+
+
+def test_pull_available_only_drops_sold_listings(tmp_path: Path):
+    output = tmp_path / "houses.csv"
+    with ExitStack() as stack:
+        patched_sources(stack, [HOUSE, SOLD_HOUSE])
+        result = runner.invoke(
+            app,
+            [
+                "pull",
+                "--db",
+                str(tmp_path / "t.db"),
+                "--output",
+                str(output),
+                "-s",
+                "immoweb",
+                "--no-details",
+                "--available-only",
+            ],
+        )
+    assert result.exit_code == 0, result.output
+    rows = list(csv.DictReader(output.open()))
+    assert [row["status"] for row in rows] == ["available"]
+
+
 def test_pull_writes_csv_and_database(tmp_path: Path):
     db = tmp_path / "test.db"
     output = tmp_path / "houses.csv"

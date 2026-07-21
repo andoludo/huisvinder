@@ -5,7 +5,7 @@ from bs4 import Tag
 
 from huisvinder.config import MAX_PRICE
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup, normalize_epc, within_budget
+from huisvinder.utils import get_static_soup, normalize_epc, normalize_status, within_budget
 from huisvinder.types import Sources
 
 
@@ -62,6 +62,9 @@ class BVMVastgoed(BaseSource):
                 if modifiers:
                     epc = normalize_epc(modifiers[0].removeprefix("epc--"))
 
+            sticker = card.select_one("span.property__sticker")
+            status = normalize_status(sticker.get_text(strip=True) if sticker else None)
+
             # category is only encoded in the URL slug, e.g. /nl/huis-te-koop-in-...
             category = None
             slug_match = re.search(r"/nl/([a-z-]+?)-(?:te|optie)-koop", link)
@@ -77,6 +80,7 @@ class BVMVastgoed(BaseSource):
                     "city": city,
                     "address": address,
                     "epc": epc,
+                    "status": status,
                     "display_price": price,
                     "bedrooms": _feature_value(card, "icon__bedroom"),
                     "living_area": _feature_value(card, "icon__surface_livable"),

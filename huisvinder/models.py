@@ -26,6 +26,7 @@ class BaseHouse(BaseModel):
     epc: str | None = None
     garage: str | None = None
     garden: str | None = None
+    status: str = "available"
 
     @model_validator(mode="after")
     def _derive_price(self) -> "BaseHouse":

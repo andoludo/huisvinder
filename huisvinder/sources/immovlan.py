@@ -1,7 +1,7 @@
 import datetime
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup
+from huisvinder.utils import get_static_soup, normalize_status
 from huisvinder.types import Sources
 
 
@@ -45,6 +45,9 @@ class Immovlan(BaseSource):
             postal_tag = art.find("span", itemprop="postalCode")
             postal_code = postal_tag.get_text(strip=True) if postal_tag else None
 
+            ribbon = art.select_one("div.ribbon.option")
+            status = normalize_status("optie" if ribbon is not None else None)
+
             bedrooms_tag = art.find("meta", itemprop="numberOfBedrooms")
             bedrooms = str(bedrooms_tag.get("content")) if bedrooms_tag else None
 
@@ -57,6 +60,7 @@ class Immovlan(BaseSource):
                     "link": link,
                     "city": city,
                     "display_price": price,
+                    "status": status,
                     "bedrooms": bedrooms,
                 }
             )

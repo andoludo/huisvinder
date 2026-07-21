@@ -5,7 +5,7 @@ from bs4 import Tag
 
 from huisvinder.config import MAX_PRICE
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup
+from huisvinder.utils import get_static_soup, normalize_status
 from huisvinder.types import Sources
 
 
@@ -45,6 +45,9 @@ class Immolight(BaseSource):
                 continue
             price = price_tag.get_text(strip=True)
 
+            badge = card.select_one("span.label")
+            status = normalize_status(badge.get_text(strip=True) if badge else None)
+
             address_tag = card.select_one(".boxed address")
             address = address_tag.get_text(" ", strip=True) if address_tag else None
 
@@ -63,6 +66,7 @@ class Immolight(BaseSource):
                     "category": category,
                     "city": city,
                     "address": address,
+                    "status": status,
                     "display_price": price,
                     "bedrooms": _icon_value(card, "SLAAPKAMER(S)"),
                     "living_area": _icon_value(card, "BEW. OPP."),

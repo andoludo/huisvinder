@@ -32,6 +32,7 @@ This writes `houses.csv` and upserts into `building.db`. Rows are keyed on `(sou
 | `--output PATH` | `houses.csv` | Output file; `.csv` or `.json` by extension |
 | `--source, -s NAME` | all | Only pull these sources (repeatable), e.g. `-s immoweb -s dedijle` |
 | `--details / --no-details` | on | Fetch each listing's detail page for EPC/address/garage/garden |
+| `--available-only` | off | Drop sold / under-option listings |
 | `--verbose, -v` | off | Debug logging |
 
 `uv run huisvinder sources` lists all supported sources. `HUISVINDER_REQUEST_DELAY` (seconds, default `0.5`) sets the polite delay between requests.
@@ -44,7 +45,7 @@ Immoweb, Immovlan, Realo, Century 21 Connect, Immo De Dijle, Immo Jan Stas, BVM 
 
 Every source is scraped over plain HTTP (`httpx`, HTTP/2, retry with backoff) — either server-rendered HTML parsed with BeautifulSoup or the site's own JSON endpoint (Immoweb, We Invest, De Immo Makelaar). No browser automation. Sold / under-option listings are skipped; where a site offers no server-side price filter, the €400k cap is applied client-side. Search areas and the price cap are currently hard-coded per source.
 
-Each listing stores the display price plus a derived numeric `price`, city, bedrooms, areas, `address`, `epc`, `garage` and `garden`. Address and EPC come from the listing cards where available; by default `pull` also fetches every listing's **detail page** (one extra request each) and fills the missing EPC/address/garage/garden from the spec tables all these sites render. Disable with `--no-details` for a fast card-only run. The €400k budget cap lives in `huisvinder/config.py` (`MAX_PRICE`).
+Each listing stores the display price plus a derived numeric `price`, city, bedrooms, areas, `address`, `epc`, `garage`, `garden` and a normalized `status` (`available` / `option` / `sold`) taken from the sites' sold- and option-badges, so genuinely available houses are easy to single out (`WHERE status = 'available'` or `pull --available-only`). Sold cards that carry no link cannot be stored and are skipped. Address and EPC come from the listing cards where available; by default `pull` also fetches every listing's **detail page** (one extra request each) and fills the missing EPC/address/garage/garden from the spec tables all these sites render. Disable with `--no-details` for a fast card-only run. The €400k budget cap lives in `huisvinder/config.py` (`MAX_PRICE`).
 
 Scrapers break when sites redesign. Offline fixture tests (`uv run pytest`) verify the parsers; `uv run pytest -m integration --no-cov` runs live smoke tests against the real sites to detect drift.
 

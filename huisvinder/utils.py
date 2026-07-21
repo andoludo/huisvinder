@@ -45,6 +45,18 @@ def normalize_epc(raw: object) -> str | None:
     return token.upper() or None
 
 
+def normalize_status(raw: object) -> str:
+    """Map sold/option badges in any of the sites' wordings to a canonical
+    status: 'sold', 'option' or 'available' (the default for anything else,
+    including 'nieuw'/'new' badges)."""
+    token = str(raw or "").strip().lower()
+    if "verkocht" in token or "verhuurd" in token or "sold" in token:
+        return "sold"
+    if "optie" in token or "option" in token or "compromis" in token:
+        return "option"
+    return "available"
+
+
 def within_budget(display_price: str, max_price: int) -> bool:
     """Client-side price cap for sites without a server-side price filter.
 

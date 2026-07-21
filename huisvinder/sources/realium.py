@@ -2,7 +2,7 @@ import datetime
 from urllib.parse import urljoin
 
 from huisvinder.models import BaseSource, BaseHouse
-from huisvinder.utils import get_static_soup
+from huisvinder.utils import get_static_soup, normalize_status
 from huisvinder.types import Sources
 
 
@@ -31,9 +31,7 @@ class Realium(BaseSource):
             link = urljoin("https://www.realium.eu/", str(link_tag["href"]))
 
             status_tag = card.select_one(".el-meta .field-value")
-            status = status_tag.get_text(strip=True) if status_tag else None
-            if status and status.lower() == "uitverkocht":
-                continue
+            status = normalize_status(status_tag.get_text(strip=True) if status_tag else None)
 
             city = None
             category = "Project"
@@ -54,6 +52,7 @@ class Realium(BaseSource):
                     "link": link,
                     "category": category,
                     "city": city,
+                    "status": status,
                     "description": description,
                 }
             )

@@ -1,6 +1,7 @@
 """Offline tests for every scraper source, driven by trimmed HTML/JSON
 fixtures captured from the live sites (tests/fixtures/)."""
 
+from collections import Counter
 from dataclasses import dataclass, field
 from unittest.mock import patch
 
@@ -34,7 +35,7 @@ from huisvinder.sources.realo import Realo
 from huisvinder.sources.ter_duin import ImmoTerDuin
 from huisvinder.sources.we_invest import WeInvest
 from huisvinder.sources.your_house import YourHouseVastgoed
-from huisvinder.utils import parse_price, within_budget
+from huisvinder.utils import normalize_status, parse_price, within_budget
 
 
 @dataclass
@@ -46,6 +47,7 @@ class SourceCase:
     expected_count: int
     n_page_urls: int
     first: dict[str, str | float | None] = field(default_factory=dict)
+    statuses: dict[str, int] | None = None
     json_based: bool = False
 
     @property
@@ -114,6 +116,7 @@ CASES = [
         cards_in_fixture=6,  # 3 over-budget cards are filtered client-side
         expected_count=3,
         n_page_urls=6,
+        statuses={"available": 2, "option": 1},
         first={
             "display_price": "€175.000",
             "price": 175000.0,
@@ -150,13 +153,15 @@ CASES = [
         cards_in_fixture=6,  # price filtering happens server-side via the URL
         expected_count=6,
         n_page_urls=1,
+        statuses={"available": 4, "option": 2},
         first={
             "display_price": "€ 699.000",
             "price": 699000.0,
             "epc": "D",
             "address": "Kampenhout, Meerlaan 56",
             "city": "Kampenhout",
-            "category": "Eengezinswoning Te koop",
+            "category": "Eengezinswoning",
+            "status": "available",
             "bedrooms": None,
             "living_area": "283 m²",
         },
@@ -196,9 +201,10 @@ CASES = [
         ImmoWonen,
         "huisvinder.sources.immowonen",
         "immowonen.html",
-        cards_in_fixture=6,  # sold + over-budget + price-on-request skipped
-        expected_count=1,
+        cards_in_fixture=6,  # 3 link-less sold cards + 1 over-budget dropped
+        expected_count=2,
         n_page_urls=1,
+        statuses={"available": 1, "option": 1},
         first={
             "display_price": "€ 312.000",
             "city": "Kerkom",
@@ -240,9 +246,10 @@ CASES = [
         Realium,
         "huisvinder.sources.realium",
         "realium.html",
-        cards_in_fixture=6,  # sold-out ("Uitverkocht") projects are skipped
-        expected_count=4,
+        cards_in_fixture=6,  # sold-out projects are kept with status "sold"
+        expected_count=6,
         n_page_urls=1,
+        statuses={"available": 4, "sold": 2},
         first={
             "display_price": None,
             "city": "Hoegaarden",
@@ -268,9 +275,10 @@ CASES = [
         ImmoRuelens,
         "huisvinder.sources.immo_ruelens",
         "ruelens.html",
-        cards_in_fixture=6,  # cards with a sold sticker are skipped
-        expected_count=5,
+        cards_in_fixture=6,  # sold/option stickers become statuses
+        expected_count=6,
         n_page_urls=1,
+        statuses={"available": 2, "option": 3, "sold": 1},
         first={
             "display_price": "€ 275.000",
             "city": "Bunsbeek (Glabbeek)",
@@ -334,9 +342,10 @@ CASES = [
         DeImmoMakelaar,
         "huisvinder.sources.de_immo_makelaar",
         "deimmomakelaar.json",
-        cards_in_fixture=3,  # 2 publications with FlowStatus "Sold" are skipped
-        expected_count=1,
+        cards_in_fixture=3,  # the over-budget sold publication is dropped
+        expected_count=2,
         n_page_urls=1,
+        statuses={"available": 1, "sold": 1},
         json_based=True,
         first={
             "display_price": "€ 394.000",
@@ -355,6 +364,7 @@ CASES = [
         cards_in_fixture=3,
         expected_count=3,
         n_page_urls=5,
+        statuses={"available": 2, "option": 1},
         json_based=True,
         first={
             "link": "https://www.immoweb.be/en/classified/apartment/for-sale/heverlee/3001/21685566",
@@ -423,12 +433,15 @@ def test_parse_fixture(case):
 
 
 @pytest.mark.parametrize("case", CASES, ids=CASE_IDS)
-def test_unavailable_listings_are_dropped(case):
-    """Sold / over-budget / price-less cards in the fixture must be skipped."""
+def test_listing_statuses(case):
+    """Sold / under-option cards must be labelled; the rest are available."""
     houses = parse_fixture(case)
     assert len(houses) == case.expected_count <= case.cards_in_fixture
+    expected = case.statuses or {"available": case.expected_count}
+    assert dict(Counter(house.status for house in houses)) == expected
     for house in houses:
-        assert "/verkocht/" not in house.link
+        if "/verkocht/" in house.link:
+            assert house.status == "sold"
 
 
 @pytest.mark.parametrize("case", CASES, ids=CASE_IDS)
@@ -508,6 +521,29 @@ def test_numeric_price_is_derived(case):
     for house in parse_fixture(case):
         if house.display_price and any(ch.isdigit() for ch in house.display_price):
             assert house.price is not None
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("Verkocht", "sold"),
+        ("recent verkocht", "sold"),
+        ("Uitverkocht", "sold"),
+        ("Verhuurd", "sold"),
+        ("Sold", "sold"),
+        ("In optie", "option"),
+        ("Optie koop", "option"),
+        ("under_option", "option"),
+        ("Compromis in opmaak", "option"),
+        ("Nieuw", "available"),
+        ("new", "available"),
+        ("Te koop", "available"),
+        (None, "available"),
+        ("", "available"),
+    ],
+)
+def test_normalize_status(raw, expected):
+    assert normalize_status(raw) == expected
 
 
 def test_get_base_house_survives_broken_pages():
