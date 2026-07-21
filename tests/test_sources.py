@@ -114,10 +114,10 @@ CASES = [
         BVMVastgoed,
         "huisvinder.sources.bvm_vastgoed",
         "bvm.html",
-        cards_in_fixture=6,  # 3 over-budget cards are filtered client-side
-        expected_count=3,
+        cards_in_fixture=6,  # 2 over-budget cards are filtered client-side
+        expected_count=4,
         n_page_urls=6,
-        statuses={"available": 2, "option": 1},
+        statuses={"available": 3, "option": 1},
         first={
             "display_price": "€175.000",
             "price": 175000.0,
@@ -231,7 +231,7 @@ CASES = [
         "huisvinder.sources.ter_duin",
         "terduin.html",
         cards_in_fixture=6,  # sold cards carry no link and are skipped
-        expected_count=3,
+        expected_count=4,
         n_page_urls=1,
         first={
             "display_price": "€ 195.000",
