@@ -254,6 +254,92 @@ def _bounded_bedrooms(count: int, raw: str) -> int | None:
 BedroomCount = Annotated[int | None, BeforeValidator(parse_bedrooms)]
 
 
+_AREA_NUMBER = re.compile(r"\d+(?:[.,]\d+)*")
+_SEPARATOR = re.compile(r"[.,]")
+
+
+def parse_area(value: str | float | None) -> float | None:
+    """Parse a raw area value ('297 m²', '15 m² woonoppervlakte') into square metres.
+
+    Stages, in order: (1) floats and ints pass through as floats (idempotent)
+    and other non-strings are left for Pydantic to reject, (2) whitespace
+    (including NBSP) is normalised, (3) the first numeric token wins — units
+    ('m²') and descriptive text ('woonoppervlakte', 'hab. sp.') are discarded,
+    (4) within the token both '.' and ',' occur as decimal separators
+    ('98,15m²', '156.5 m²') but also as thousands separators ('1,000 m²',
+    '2.810 m²' are 1000 and 2810 m²): a final group of exactly three digits is
+    grouping, anything shorter or longer is a decimal part, (5) a string
+    without a number becomes None and is logged at debug level.
+    """
+    if not isinstance(value, str):
+        if isinstance(value, int | float) and not isinstance(value, bool):
+            return float(value)
+        return value
+    text = _WHITESPACE_RUN.sub(" ", value.replace("\xa0", " ")).strip()
+    if number_match := _AREA_NUMBER.search(text):
+        return _area_token_to_float(number_match.group())
+    if text:
+        logger.debug("Unparseable area %r, storing None", value)
+    return None
+
+
+def _area_token_to_float(token: str) -> float:
+    """Resolve the '.'/',' separators in a numeric token and return the float."""
+    parts = _SEPARATOR.split(token)
+    if len(parts) == 1:
+        return float(token)
+    if len(parts[-1]) == 3 and parts[0] != "0":
+        return float("".join(parts))
+    return float("".join(parts[:-1]) + "." + parts[-1])
+
+
+AreaSquareMetres = Annotated[float | None, BeforeValidator(parse_area)]
+
+
+# word matches so 'no' does not fire inside 'Noordwest'; 'Ja (Zuidwest)' and
+# '1: ja' must still parse as yes
+_PRESENCE_NO = re.compile(r"\b(?:no|nee|neen|geen)\b")
+_PRESENCE_YES = re.compile(r"\b(?:ja|yes|oui)\b")
+_PRESENCE_MISSING = {"", "-", "n/a", "nvt", "onbekend", "none", "null"}
+_PRESENCE_NUMBER = re.compile(r"\d+(?:[.,]\d+)?")
+
+
+def parse_presence(value: str | bool | None) -> bool | None:
+    """Parse a raw garden/garage cell into a presence flag.
+
+    The stages mirror the value shapes in the scraped data, in order: (1) bools
+    pass through (idempotent), other numbers mean a count so nonzero is True,
+    and any other non-string is left for Pydantic to reject, (2) whitespace is
+    normalised and missing markers (including the literal 'None') become None,
+    (3) 'mogelijkheid ...' means the feature can be bought separately but is
+    not part of the sale — ambiguous, so None, (4) a negative or affirmative
+    word anywhere wins ('Nee', 'No', 'Ja (Zuidwest)', '1: ja'), (5) a
+    number is a count or a size, so nonzero means present ('1', '4 plaatsen',
+    '90,00 m²', '5.58 x 4.0'), (6) any other text describes the feature
+    ('Zuidwest', 'Autostaanplaats'), which implies presence, so True.
+    """
+    if not isinstance(value, str):
+        if isinstance(value, bool):
+            return value
+        return value != 0 if isinstance(value, int | float) else value
+    return _presence_from_text(_WHITESPACE_RUN.sub(" ", value.replace("\xa0", " ")).strip().casefold())
+
+
+def _presence_from_text(text: str) -> bool | None:
+    if text in _PRESENCE_MISSING or text.startswith("mogelijkheid"):
+        return None
+    if _PRESENCE_NO.search(text):
+        return False
+    if _PRESENCE_YES.search(text):
+        return True
+    if number_match := _PRESENCE_NUMBER.search(text):
+        return _area_token_to_float(number_match.group()) != 0
+    return True
+
+
+PresenceFlag = Annotated[bool | None, BeforeValidator(parse_presence)]
+
+
 class BaseHouse(BaseModel):
     source: Sources
     created_at: datetime
@@ -265,12 +351,12 @@ class BaseHouse(BaseModel):
     category: Category = None
     description: str | None = None
     bedrooms: BedroomCount = None
-    living_area: str | None = None
-    surface_ground: str | None = None
+    living_area: AreaSquareMetres = None
+    surface_ground: AreaSquareMetres = None
     epc: EpcValue = None
     epc_is_estimated: bool | None = None
-    garage: str | None = None
-    garden: str | None = None
+    garage: PresenceFlag = None
+    garden: PresenceFlag = None
     status: str = "available"
 
     @model_validator(mode="before")

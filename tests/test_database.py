@@ -1,4 +1,6 @@
 import datetime
+import shutil
+import sqlite3
 from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
@@ -8,7 +10,9 @@ import sqlmodel
 from huisvinder import services
 from huisvinder.database.crud import HuisVinderDb
 from huisvinder.database.schemas import BaseHouseORM
-from huisvinder.models import BaseHouse
+from huisvinder.models import BaseHouse, parse_area, parse_presence
+
+FIXTURE_DB = Path(__file__).parent / "sources" / "building.db"
 
 
 def make_house(link: str = "https://example.test/1") -> BaseHouse:
@@ -47,3 +51,33 @@ def test_read_houses_collects_all_sources_into_db(tmp_path: Path):
         services.read_houses(database_path)
     db = HuisVinderDb(database_path=database_path)
     assert count_rows(db) == 1
+
+
+def test_migration_harmonises_area_and_presence_columns(tmp_path: Path):
+    # snapshot the raw strings first; opening the copy runs the migrations on it
+    before = sqlite3.connect(FIXTURE_DB)
+    try:
+        columns = "source, link, living_area, surface_ground, garden, garage"
+        raw = before.execute(f"SELECT {columns} FROM basehouse").fetchall()  # noqa: S608 -- literal column list
+    finally:
+        before.close()
+    assert raw, "fixture db must contain listings"
+
+    database = tmp_path / "building.db"
+    shutil.copy(FIXTURE_DB, database)
+    db = HuisVinderDb(database_path=database)
+
+    with sqlmodel.Session(db._engine) as session:
+        houses = {(h.source, h.link): h for h in session.query(BaseHouseORM).all()}
+    assert len(houses) == len(raw)
+    for source, link, living_area, surface_ground, garden, garage in raw:
+        house = houses[source, link]
+        assert isinstance(house.living_area, float | type(None))
+        assert isinstance(house.surface_ground, float | type(None))
+        assert isinstance(house.garden, bool | type(None))
+        assert isinstance(house.garage, bool | type(None))
+        # every migrated cell matches what the parser says about the raw string
+        assert house.living_area == parse_area(living_area), living_area
+        assert house.surface_ground == parse_area(surface_ground), surface_ground
+        assert house.garden is parse_presence(garden), garden
+        assert house.garage is parse_presence(garage), garage

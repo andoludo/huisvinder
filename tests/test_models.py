@@ -8,9 +8,11 @@ from huisvinder.models import (
     PropertyCategory,
     classify_category,
     normalise_city,
+    parse_area,
     parse_bedrooms,
     parse_epc,
     parse_epc_with_source,
+    parse_presence,
 )
 
 CITY_CASES = [
@@ -270,6 +272,127 @@ def test_zero_bedrooms_survives_the_model():
 def test_non_numeric_bedrooms_is_rejected_by_pydantic():
     with pytest.raises(ValidationError):
         make_house(bedrooms=["3"])
+
+
+AREA_CASES = [
+    # unit and free-text notations from the scraped data
+    ("297 m²", 297.0),
+    ("15 m² woonoppervlakte", 15.0),
+    ("176 m² hab. sp.", 176.0),
+    ("256 m² grondoppervlakte", 256.0),
+    ("124m²", 124.0),
+    ("18\xa0m²", 18.0),
+    ("73  m²", 73.0),
+    ("  100 m²  ", 100.0),
+    ("210", 210.0),
+    ("60.0", 60.0),
+    # decimal separators, both spellings
+    ("98,15m²", 98.15),
+    ("18,50m²", 18.5),
+    ("156.5 m²", 156.5),
+    ("20.2 m²", 20.2),
+    # thousands grouping, both spellings
+    ("1,000 m² grondoppervlakte", 1000.0),
+    ("11,417 m² grondoppervlakte", 11417.0),
+    ("2.810  m²", 2810.0),
+    ("1.200  m²", 1200.0),
+    ("2,603 m² grondoppervlakte", 2603.0),
+    # first numeric token wins
+    ("120 - 150 m²", 120.0),
+    ("5.58 x 4.0", 5.58),
+    ("0", 0.0),
+    # missing / junk
+    (None, None),
+    ("", None),
+    ("   ", None),
+    ("onbekend", None),
+    ("m²", None),
+    ("gibberish", None),
+]
+
+
+@pytest.mark.parametrize(("raw", "expected"), AREA_CASES)
+def test_parse_area(raw, expected):
+    assert parse_area(raw) == expected
+
+
+@pytest.mark.parametrize("clean", [297.0, 98.15, 0.0, 210])
+def test_parse_area_is_idempotent_on_numbers(clean):
+    assert parse_area(clean) == float(clean)
+    assert parse_area(parse_area("98,15m²")) == 98.15
+
+
+def test_area_on_the_model():
+    house = make_house(living_area="297 m²", surface_ground="1,000 m² grondoppervlakte")
+    assert house.living_area == 297.0
+    assert house.surface_ground == 1000.0
+    again = BaseHouse.model_validate(house.model_dump())
+    assert (again.living_area, again.surface_ground) == (297.0, 1000.0)
+
+
+def test_non_numeric_area_is_rejected_by_pydantic():
+    with pytest.raises(ValidationError):
+        make_house(living_area=["297"])
+
+
+PRESENCE_CASES = [
+    # yes/no words, Dutch and English, any casing
+    ("Ja", True),
+    ("ja", True),
+    ("Yes", True),
+    ("Ja (Zuidwest)", True),
+    ("1: ja", True),
+    ("No", False),
+    ("Nee", False),
+    ("neen", False),
+    ("geen", False),
+    # counts: nonzero present, zero absent
+    ("1", True),
+    ("4", True),
+    ("0", False),
+    ("4 plaatsen", True),
+    ("1 (1 plaats)", True),
+    # a size or dimensions imply presence
+    ("90,00 m²", True),
+    ("56 m²", True),
+    ("5.58 x 4.0", True),
+    # an orientation or description implies presence; 'no' must not fire
+    # inside 'Noordwest'
+    ("Zuidwest", True),
+    ("Noordwest", True),
+    ("Autostaanplaats", True),
+    ("inpandige autostaanplaats", True),
+    ("Ruime werkplaats/garage met smeerput - ca. 70m2", True),
+    # 'possibility to buy separately' is not part of the sale: ambiguous
+    ("mogelijkheid tot aankoop inpandige garagebox mits 25 000,00 euro", None),
+    ("Mogelijkheid: ruime garagebox met recente, geautomatiseerde poort (mits 25k euro)", None),
+    # missing markers
+    (None, None),
+    ("", None),
+    ("  ", None),
+    ("-", None),
+    ("n/a", None),
+    ("None", None),
+    ("onbekend", None),
+]
+
+
+@pytest.mark.parametrize(("raw", "expected"), PRESENCE_CASES)
+def test_parse_presence(raw, expected):
+    assert parse_presence(raw) is expected
+
+
+@pytest.mark.parametrize("flag", [True, False])
+def test_parse_presence_is_idempotent_on_bools(flag):
+    assert parse_presence(flag) is flag
+    assert make_house(garden=flag).garden is flag
+
+
+def test_presence_on_the_model():
+    house = make_house(garden="Ja (Zuidwest)", garage="Nee")
+    assert (house.garden, house.garage) == (True, False)
+    again = BaseHouse.model_validate(house.model_dump())
+    assert (again.garden, again.garage) == (True, False)
 
 
 def make_house(**kwargs) -> BaseHouse:

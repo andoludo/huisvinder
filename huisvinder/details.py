@@ -14,7 +14,7 @@ from collections.abc import Callable
 
 from bs4 import BeautifulSoup, Tag
 
-from huisvinder.models import BaseHouse, parse_epc_with_source
+from huisvinder.models import BaseHouse, parse_epc_with_source, parse_presence
 from huisvinder.utils import get_static_soup
 
 logger = logging.getLogger(__name__)
@@ -185,9 +185,10 @@ def enrich_house(house: BaseHouse, soup: BeautifulSoup | Tag | None = None) -> N
     if house.address is None:
         house.address = _json_ld_address(soup) or _lookup(pairs, ADDRESS_LABELS)  # type: ignore[arg-type]
     if house.garage is None:
-        house.garage = _lookup(pairs, GARAGE_LABELS)
+        # plain assignment skips the model's validators, so parse explicitly
+        house.garage = parse_presence(_lookup(pairs, GARAGE_LABELS))
     if house.garden is None:
-        house.garden = _lookup(pairs, GARDEN_LABELS)
+        house.garden = parse_presence(_lookup(pairs, GARDEN_LABELS))
 
 
 def enrich_houses(houses: list[BaseHouse]) -> None:

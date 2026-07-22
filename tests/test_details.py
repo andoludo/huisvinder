@@ -27,7 +27,7 @@ PLATFORM_CASES = [
     (
         "century21.html",  # Omnicasa/Elementor with English labels
         "Century21",
-        {"epc": 559, "epc_is_estimated": False, "garage": "No", "garden": "Yes"},
+        {"epc": 559, "epc_is_estimated": False, "garage": False, "garden": True},
     ),
     (
         "era.html",  # Drupal field wrappers + JSON-LD Residence
@@ -49,8 +49,8 @@ PLATFORM_CASES = [
         {
             "epc": 730,
             "address": "Sint-Jorisstraat 66 Oorbeek",
-            "garage": "Ja",
-            "garden": "Ja",
+            "garage": True,
+            "garden": True,
         },
     ),
     (
@@ -65,13 +65,13 @@ PLATFORM_CASES = [
             "epc": 157,
             "epc_is_estimated": False,
             "address": "Baron Descampslaan 96 1, 3018 Wijgmaal",
-            "garden": "Ja",
+            "garden": True,
         },
     ),
     (
         "vastgoedsv.html",  # Whise dl: kWh value sits under an empty dt after "EPC"
         "VastgoedSV",
-        {"epc": 377, "epc_is_estimated": False, "garage": "1"},
+        {"epc": 377, "epc_is_estimated": False, "garage": True},
     ),
     (
         "eraleuven.html",  # Drupal fields, English labels
@@ -114,7 +114,7 @@ def test_enrich_house_does_not_overwrite_existing_fields():
     enrich_house(house, soup=soup)
     assert house.epc == 0  # A+ band midpoint; already set, so not overwritten
     assert house.address == "Kept 1, 3000 Leuven"
-    assert house.garage == "Ja"  # missing fields are still filled
+    assert house.garage is True  # missing fields are still filled
 
 
 def test_enrich_house_empty_page_leaves_fields_none():

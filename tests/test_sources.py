@@ -76,7 +76,7 @@ CASES = [
             "city": "LINDEN",
             "category": "house",
             "bedrooms": 3,
-            "living_area": "124m²",
+            "living_area": 124.0,
         },
     ),
     SourceCase(
@@ -93,7 +93,7 @@ CASES = [
             "city": "BLANKENBERGE",
             "category": "house",
             "bedrooms": 2,
-            "living_area": "210",
+            "living_area": 210.0,
         },
     ),
     SourceCase(
@@ -110,7 +110,7 @@ CASES = [
             "city": "LEUVEN",
             "category": "other",
             "bedrooms": 1,
-            "living_area": "16 m²",
+            "living_area": 16.0,
         },
     ),
     SourceCase(
@@ -129,7 +129,7 @@ CASES = [
             "city": "LEUVEN",
             "category": "other",
             "bedrooms": 1,
-            "living_area": "30\xa0m²",
+            "living_area": 30.0,
         },
     ),
     SourceCase(
@@ -147,7 +147,7 @@ CASES = [
             "city": "ROTSELAAR",
             "category": "house",
             "bedrooms": 4,
-            "living_area": "221 m²",
+            "living_area": 221.0,
         },
     ),
     SourceCase(
@@ -167,7 +167,7 @@ CASES = [
             "category": "house",
             "status": "available",
             "bedrooms": None,
-            "living_area": "283 m²",
+            "living_area": 283.0,
         },
     ),
     SourceCase(
@@ -182,7 +182,7 @@ CASES = [
             "city": "LEUVEN",
             "category": "other",
             "bedrooms": 1,
-            "living_area": "13 m²",
+            "living_area": 13.0,
         },
     ),
     SourceCase(
@@ -198,7 +198,7 @@ CASES = [
             "city": "LEUVEN",
             "category": "other",
             "bedrooms": None,
-            "living_area": "16 m²",
+            "living_area": 16.0,
         },
     ),
     SourceCase(
@@ -226,7 +226,7 @@ CASES = [
             "display_price": "€ 200.000",
             "city": "HAACHT",
             "category": "other",
-            "surface_ground": "587 m²",
+            "surface_ground": 587.0,
         },
     ),
     SourceCase(
@@ -243,7 +243,7 @@ CASES = [
             "city": "LEUVEN",
             "category": "apartment",
             "bedrooms": 1,
-            "living_area": "29 m²",
+            "living_area": 29.0,
         },
     ),
     SourceCase(
@@ -272,7 +272,7 @@ CASES = [
             "display_price": "€ 365.000",
             "city": "KEERBERGEN",
             "bedrooms": 3,
-            "living_area": "151 m²",
+            "living_area": 151.0,
         },
     ),
     SourceCase(
@@ -305,7 +305,7 @@ CASES = [
             "city": "AARSCHOT",
             "category": "house",
             "bedrooms": 3,
-            "living_area": "116\xa0m²",
+            "living_area": 116.0,
         },
     ),
     SourceCase(
@@ -378,7 +378,7 @@ CASES = [
             "city": "HEVERLEE",
             "category": "apartment",
             "bedrooms": 2,
-            "living_area": "75",
+            "living_area": 75.0,
         },
     ),
     SourceCase(
@@ -396,7 +396,7 @@ CASES = [
             "city": "KESSEL-LO",
             "category": "house",
             "bedrooms": 3,
-            "living_area": "86 m²",
+            "living_area": 86.0,
         },
     ),
     SourceCase(
@@ -413,7 +413,7 @@ CASES = [
             "city": "ROTSELAAR",
             "category": "other",
             "status": "available",
-            "surface_ground": "730m²",
+            "surface_ground": 730.0,
         },
     ),
     SourceCase(
@@ -431,8 +431,8 @@ CASES = [
             "category": "house",
             "status": "available",
             "bedrooms": 3,
-            "living_area": "86m²",
-            "surface_ground": "71m²",
+            "living_area": 86.0,
+            "surface_ground": 71.0,
         },
     ),
     SourceCase(
