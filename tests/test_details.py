@@ -27,7 +27,8 @@ PLATFORM_CASES = [
     (
         "century21.html",  # Omnicasa/Elementor with English labels
         "Century21",
-        {"epc": 559, "epc_is_estimated": False, "garage": False, "garden": True},
+        # 'Garage: No' but 'internal parkings: 1' -> parking present wins
+        {"epc": 559, "epc_is_estimated": False, "garage": True, "garden": True},
     ),
     (
         "era.html",  # Drupal field wrappers + JSON-LD Residence
@@ -54,9 +55,9 @@ PLATFORM_CASES = [
         },
     ),
     (
-        "immoweb.html",  # JS-rendered tables; EPC from window.classified JSON
+        "immoweb.html",  # JS-rendered tables; EPC + parking from window.classified
         "Immoweb",
-        {"epc": 140, "epc_is_estimated": False},
+        {"epc": 140, "epc_is_estimated": False, "garage": True, "garden": None},
     ),
     (
         "immovlan.html",  # "<h4>label</h4> value" spec blocks
@@ -142,3 +143,32 @@ def test_harvest_pairs_patterns():
     assert pairs["garage"] == "Ja"
     assert pairs["tuin"] == "Nee"
     assert pairs["energielabel"] == "C"
+
+
+def test_presence_aggregates_over_all_matching_labels():
+    """Several parking slots: any positive count wins over a 'No'."""
+    soup = BeautifulSoup(
+        """
+        <table>
+        <tr><th>Garage</th><td>Nee</td></tr>
+        <tr><th>Parkings buiten</th><td>0</td></tr>
+        <tr><th>Aantal garages</th><td>2</td></tr>
+        <tr><th>Tuin aanwezig</th><td>Nee</td></tr>
+        </table>
+        """,
+        "html.parser",
+    )
+    house = make_house()
+    enrich_house(house, soup=soup)
+    assert house.garage is True
+    assert house.garden is False
+
+
+def test_presence_terrace_is_not_a_garden():
+    soup = BeautifulSoup(
+        "<table><tr><th>Terras</th><td>Ja</td></tr></table>",
+        "html.parser",
+    )
+    house = make_house()
+    enrich_house(house, soup=soup)
+    assert house.garden is None

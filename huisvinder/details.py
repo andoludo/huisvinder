@@ -40,17 +40,11 @@ EPC_LABELS = [
     "energy label",
 ]
 ADDRESS_LABELS = ["adres", "address"]
-GARAGE_LABELS = [
-    "garage",
-    "garages",
-    "garagebox",
-    "parkeerplaatsen",
-    "parking",
-    "parkings",
-    "internal parkings",
-    "external parkings",
-]
-GARDEN_LABELS = ["tuin", "garden", "tuinoppervlakte", "tuin oppervlakte", "garden surface", "oriëntatie tuin"]
+# stems matched against every harvested label ("aantal garages", "parkings
+# binnen", "garagebox 1 (gelijkvloers)", "tuin aanwezig", "geschatte
+# tuinoppervlakte", ...); "terras" is deliberately NOT a garden stem
+GARAGE_STEMS = re.compile(r"\b(?:garage|parking|parkeer|staanplaats|autostaanplaats|carport)")
+GARDEN_STEMS = re.compile(r"\b(?:tuin|garden)")
 
 PROGRESS_EVERY = 25
 # JSON-LD @types that describe the property itself (not the agency)
@@ -129,19 +123,40 @@ def _harvest_drupal_fields(soup: BeautifulSoup, add: Callable[[str, str], None])
 _CLASSIFIED_BLOB = re.compile(r"window\.classified\s*=\s*(\{.*?\});", re.DOTALL)
 
 
-def _classified_epc(soup: BeautifulSoup) -> object | None:
-    """EPC from immoweb's inline window.classified JSON (its spec tables are
-    empty in static HTML and only filled by JavaScript)."""
+def _classified_blob(soup: BeautifulSoup) -> dict[str, object]:
+    """immoweb's inline window.classified JSON (its spec tables are empty in
+    static HTML and only filled by JavaScript)."""
     for script in soup.find_all("script"):
         match = _CLASSIFIED_BLOB.search(script.string or "")
         if match is None:
             continue
         try:
-            blob = json.loads(match.group(1))
+            return dict(json.loads(match.group(1)))
         except json.JSONDecodeError:
             continue
-        certificates = (blob.get("transaction") or {}).get("certificates") or {}
-        return certificates.get("primaryEnergyConsumptionPerSqm") or certificates.get("epcScore")
+    return {}
+
+
+def _classified_epc(blob: dict[str, object]) -> object | None:
+    certificates = (blob.get("transaction") or {}).get("certificates") or {}  # type: ignore[attr-defined]
+    return certificates.get("primaryEnergyConsumptionPerSqm") or certificates.get("epcScore")
+
+
+def _classified_garage(prop: dict[str, object]) -> bool | None:
+    counts = [prop.get(key) for key in ("parkingCountIndoor", "parkingCountOutdoor", "parkingCountClosedBox")]
+    known = [count for count in counts if isinstance(count, int | float)]
+    if not known:
+        return None
+    return any(known)
+
+
+def _classified_garden(prop: dict[str, object]) -> bool | None:
+    has_garden = prop.get("hasGarden")
+    if isinstance(has_garden, bool):
+        return has_garden
+    surface = prop.get("gardenSurface")
+    if isinstance(surface, int | float):
+        return surface != 0
     return None
 
 
@@ -171,24 +186,40 @@ def _lookup(pairs: dict[str, str], labels: list[str] | set[str]) -> str | None:
     return None
 
 
+def _presence_from_pairs(pairs: dict[str, str], stems: re.Pattern[str]) -> bool | None:
+    """Aggregate presence over every pair whose label matches the stems: a
+    site may list several slots ('parkings binnen: 1', 'parkings buiten: 0'),
+    so any positive wins, then any explicit negative, else unknown."""
+    found = [parse_presence(value) for label, value in pairs.items() if stems.search(label)]
+    if True in found:
+        return True
+    if False in found:
+        return False
+    return None
+
+
 def enrich_house(house: BaseHouse, soup: BeautifulSoup | Tag | None = None) -> None:
     """Fill missing epc/address/garage/garden from the listing's detail page."""
     if soup is None:
         soup = get_static_soup(house.link)
     pairs = harvest_pairs(soup)  # type: ignore[arg-type]
+    blob = _classified_blob(soup)  # type: ignore[arg-type]
+    classified_property: dict[str, object] = dict(blob.get("property") or {})  # type: ignore[call-overload]
     if house.epc is None:
         raw_epc = _lookup(pairs, EPC_LABELS)
         if raw_epc is None:
-            raw_epc = _classified_epc(soup)  # type: ignore[arg-type, assignment]
+            raw_epc = _classified_epc(blob)  # type: ignore[assignment]
         # plain assignment skips the model's validators, so parse explicitly
         house.epc, house.epc_is_estimated = parse_epc_with_source(raw_epc)
     if house.address is None:
         house.address = _json_ld_address(soup) or _lookup(pairs, ADDRESS_LABELS)  # type: ignore[arg-type]
     if house.garage is None:
         # plain assignment skips the model's validators, so parse explicitly
-        house.garage = parse_presence(_lookup(pairs, GARAGE_LABELS))
+        garage = _presence_from_pairs(pairs, GARAGE_STEMS)
+        house.garage = garage if garage is not None else _classified_garage(classified_property)
     if house.garden is None:
-        house.garden = parse_presence(_lookup(pairs, GARDEN_LABELS))
+        garden = _presence_from_pairs(pairs, GARDEN_STEMS)
+        house.garden = garden if garden is not None else _classified_garden(classified_property)
 
 
 def enrich_houses(houses: list[BaseHouse]) -> None:
