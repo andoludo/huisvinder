@@ -9,6 +9,7 @@ the address, so one implementation covers every source."""
 
 import json
 import logging
+import re
 from collections.abc import Callable
 
 from bs4 import BeautifulSoup, Tag
@@ -18,20 +19,26 @@ from huisvinder.utils import get_static_soup
 
 logger = logging.getLogger(__name__)
 
-EPC_LABELS = {
-    "epc",
+# ordered: measured kWh/m² labels first, letter labels (band-midpoint
+# estimates) as fallback
+EPC_LABELS = [
+    "specifiek primair energieverbruik",
+    "primary energy consumption",
+    "calculated specific energy consumption",
+    "berekend specifiek energieverbruik",
+    "energieprestatie (epc)",
     "epc index",
     "epc waarde",
     "epc-waarde",
     "epc score",
+    "epc",
     "epc label",
-    "energieprestatie (epc)",
+    "energielabel",
     "energieklasse",
     "energiescore",
     "energy class",
-    "energielabel",
-    "specifiek primair energieverbruik",
-}
+    "energy label",
+]
 ADDRESS_LABELS = ["adres", "address"]
 GARAGE_LABELS = [
     "garage",
@@ -72,9 +79,7 @@ def harvest_pairs(soup: BeautifulSoup) -> dict[str, str]:
         if label and value and len(label) < 40 and len(value) < 100:
             pairs.setdefault(label, value)
 
-    for dl in soup.find_all("dl"):
-        for dt, dd in zip(dl.find_all("dt"), dl.find_all("dd"), strict=False):
-            add(dt.get_text(" ", strip=True), dd.get_text(" ", strip=True))
+    _harvest_definition_lists(soup, add)
     for row in soup.find_all("tr"):
         cells = row.find_all(["th", "td"])
         if len(cells) == 2:
@@ -83,8 +88,31 @@ def harvest_pairs(soup: BeautifulSoup) -> dict[str, str]:
         children = item.find_all(["span", "div", "p"], recursive=False)
         if len(children) == 2:
             add(children[0].get_text(" ", strip=True), children[1].get_text(" ", strip=True))
+    _harvest_heading_blocks(soup, add)
     _harvest_drupal_fields(soup, add)
     return pairs
+
+
+def _harvest_definition_lists(soup: BeautifulSoup, add: Callable[[str, str], None]) -> None:
+    """dt/dd pairs; an empty dt continues the previous label (Whise renders
+    the EPC badge and its kWh value as two consecutive rows)."""
+    for dl in soup.find_all("dl"):
+        last_label = ""
+        for dt, dd in zip(dl.find_all("dt"), dl.find_all("dd"), strict=False):
+            label = dt.get_text(" ", strip=True)
+            if label:
+                last_label = label
+            add(last_label, dd.get_text(" ", strip=True))
+
+
+def _harvest_heading_blocks(soup: BeautifulSoup, add: Callable[[str, str], None]) -> None:
+    """immovlan-style "<h4>label</h4> value" blocks."""
+    for heading in soup.find_all("h4"):
+        label = heading.get_text(" ", strip=True)
+        if heading.parent is None:
+            continue
+        value = heading.parent.get_text(" ", strip=True).removeprefix(label)
+        add(label, value)
 
 
 def _harvest_drupal_fields(soup: BeautifulSoup, add: Callable[[str, str], None]) -> None:
@@ -96,6 +124,25 @@ def _harvest_drupal_fields(soup: BeautifulSoup, add: Callable[[str, str], None])
         label = label_tag.get_text(" ", strip=True)
         value = field.get_text(" ", strip=True).removeprefix(label)
         add(label, value)
+
+
+_CLASSIFIED_BLOB = re.compile(r"window\.classified\s*=\s*(\{.*?\});", re.DOTALL)
+
+
+def _classified_epc(soup: BeautifulSoup) -> object | None:
+    """EPC from immoweb's inline window.classified JSON (its spec tables are
+    empty in static HTML and only filled by JavaScript)."""
+    for script in soup.find_all("script"):
+        match = _CLASSIFIED_BLOB.search(script.string or "")
+        if match is None:
+            continue
+        try:
+            blob = json.loads(match.group(1))
+        except json.JSONDecodeError:
+            continue
+        certificates = (blob.get("transaction") or {}).get("certificates") or {}
+        return certificates.get("primaryEnergyConsumptionPerSqm") or certificates.get("epcScore")
+    return None
 
 
 def _json_ld_address(soup: BeautifulSoup) -> str | None:
@@ -130,8 +177,11 @@ def enrich_house(house: BaseHouse, soup: BeautifulSoup | Tag | None = None) -> N
         soup = get_static_soup(house.link)
     pairs = harvest_pairs(soup)  # type: ignore[arg-type]
     if house.epc is None:
+        raw_epc = _lookup(pairs, EPC_LABELS)
+        if raw_epc is None:
+            raw_epc = _classified_epc(soup)  # type: ignore[arg-type, assignment]
         # plain assignment skips the model's validators, so parse explicitly
-        house.epc, house.epc_is_estimated = parse_epc_with_source(_lookup(pairs, EPC_LABELS))
+        house.epc, house.epc_is_estimated = parse_epc_with_source(raw_epc)
     if house.address is None:
         house.address = _json_ld_address(soup) or _lookup(pairs, ADDRESS_LABELS)  # type: ignore[arg-type]
     if house.garage is None:

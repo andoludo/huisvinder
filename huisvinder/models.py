@@ -405,5 +405,5 @@ class PropertySalesRecord(BaseModel):
 
 class Simulation(BaseModel):
     budget: float = 400000
-    localities: list[str] = ["BIERBEEK","HOLSBEEK","LEUVEN","OUD-HEVERLEE","LUBBEEK"]
+    localities: list[str] = ["BIERBEEK", "HOLSBEEK", "LEUVEN", "OUD-HEVERLEE", "LUBBEEK"]
     min_year: int = 2023

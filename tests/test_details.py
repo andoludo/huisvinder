@@ -33,8 +33,8 @@ PLATFORM_CASES = [
         "era.html",  # Drupal field wrappers + JSON-LD Residence
         "ERAVandendries",
         {
-            "epc": 150,
-            "epc_is_estimated": True,
+            "epc": 189,  # measured consumption now beats the letter label
+            "epc_is_estimated": False,
             "address": "Karel van Lotharingenstraat 26 0101, 3000 Leuven",
         },
     ),
@@ -51,6 +51,35 @@ PLATFORM_CASES = [
             "address": "Sint-Jorisstraat 66 Oorbeek",
             "garage": "Ja",
             "garden": "Ja",
+        },
+    ),
+    (
+        "immoweb.html",  # JS-rendered tables; EPC from window.classified JSON
+        "Immoweb",
+        {"epc": 140, "epc_is_estimated": False},
+    ),
+    (
+        "immovlan.html",  # "<h4>label</h4> value" spec blocks
+        "Immovlan",
+        {
+            "epc": 157,
+            "epc_is_estimated": False,
+            "address": "Baron Descampslaan 96 1, 3018 Wijgmaal",
+            "garden": "Ja",
+        },
+    ),
+    (
+        "vastgoedsv.html",  # Whise dl: kWh value sits under an empty dt after "EPC"
+        "VastgoedSV",
+        {"epc": 377, "epc_is_estimated": False, "garage": "1"},
+    ),
+    (
+        "eraleuven.html",  # Drupal fields, English labels
+        "ERALeuven",
+        {
+            "epc": 230,
+            "epc_is_estimated": False,
+            "address": "Mechelsevest 124, 3000 Leuven",
         },
     ),
 ]
