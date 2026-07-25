@@ -1,6 +1,6 @@
 from sqlmodel import Field, SQLModel
 
-from huisvinder.models import BaseHouse, PropertySalesRecord
+from huisvinder.models import BaseHouse, MedianPriceRecord, PropertySalesRecord
 
 
 class BaseHouseORM(SQLModel, BaseHouse, table=True):
@@ -47,3 +47,16 @@ class PropertySalesRecordORM(SQLModel, PropertySalesRecord, table=True):  # type
     apartments_median: float | None = Field(default=None, alias="appartementen__mediaan_prijs")  # type: ignore[assignment]
     apartments_q1: float | None = Field(default=None, alias="appartementen__eerste_kwartiel_prijs")  # type: ignore[assignment]
     apartments_q3: float | None = Field(default=None, alias="appartementen__derde_kwartiel_prijs")  # type: ignore[assignment]
+
+
+# the inherited median_price column stays Decimal and maps to NUMERIC: these are
+# currency values, and the natural key (nis_code, indicator, year, property_type)
+# is the primary key so reloads replace rather than duplicate
+class MedianPriceRecordORM(SQLModel, MedianPriceRecord, table=True):  # type: ignore[misc]
+    municipality: str = Field(alias="Gemeente", index=True)
+    nis_code: str = Field(
+        alias="NIS-code", description="NIS code, kept as str to preserve leading zeros", index=True, primary_key=True
+    )
+    indicator: str = Field(alias="Indicator", primary_key=True)
+    year: int = Field(alias="Jaar", ge=1900, le=2100, index=True, primary_key=True)
+    property_type: str = Field(alias="Type", primary_key=True)

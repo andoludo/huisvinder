@@ -8,7 +8,8 @@ import typer
 
 from huisvinder.database.crud import HuisVinderDb
 from huisvinder.models import BaseHouse, BaseSource, Simulation
-from huisvinder.services import SOURCES, add_property_sales_record, collect_houses, create_report
+from huisvinder.services import SOURCES, add_property_sales_record, collect_houses, create_report, \
+    add_median_price_records
 
 app = typer.Typer(help="Scrape Leuven-area real-estate listings.", no_args_is_help=True)
 logger = logging.getLogger(__name__)
@@ -84,6 +85,7 @@ def fetch(
     """Fetch all houses from every source with full details into a database."""
     _configure_logging(verbose)
     add_property_sales_record(database)
+    add_median_price_records(database)
     houses = collect_houses(with_details=True)
     HuisVinderDb(database_path=database).add_houses(houses)
     logger.info("Stored %d available listings in %s", len(houses), database)

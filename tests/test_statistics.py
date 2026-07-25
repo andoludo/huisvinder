@@ -5,8 +5,8 @@ import openpyxl
 import sqlmodel
 
 from huisvinder.database.crud import HuisVinderDb
-from huisvinder.database.schemas import PropertySalesRecordORM
-from huisvinder.services import add_property_sales_record, load_property_sales_records
+from huisvinder.database.schemas import MedianPriceRecordORM, PropertySalesRecordORM
+from huisvinder.services import add_median_price_records, add_property_sales_record, load_property_sales_records
 
 SEGMENTS = [
     "Alle huizen met 2, 3, 4 of meer gevels (excl. appartementen)",
@@ -102,3 +102,76 @@ def test_invalid_row_is_skipped_and_logged(tmp_path: Path, caplog):
     assert [record.nis_code for record in records] == ["11001"]
     assert "refnis=11002" in caplog.text
     assert "Q9" in caplog.text
+
+
+MEDIAN_HEADER = "Gemeente;NIS-code;Indicator;Jaar;Type;Mediaanprijs (in euro)"
+
+
+def write_median_csv(path: Path, rows: list[str]) -> Path:
+    """Build a fixture CSV mirroring the Gemeente-Stadsmonitor WO_07 export."""
+    path.write_text("\n".join([MEDIAN_HEADER, *rows]) + "\n", encoding="utf-8")
+    return path
+
+
+def load_median_orm_rows(db: HuisVinderDb) -> list[MedianPriceRecordORM]:
+    with sqlmodel.Session(db._engine) as session:
+        return list(session.exec(sqlmodel.select(MedianPriceRecordORM)).all())
+
+
+def test_median_price_decimal_comma_and_suppressed_cells(tmp_path: Path):
+    csv_path = write_median_csv(
+        tmp_path / "wo07.csv",
+        [
+            "Leuven;24062;Mediaanprijs huizen;2024;Alle huizen;372500,5",
+            "Boom;11005;Mediaanprijs huizen;2010;Open bebouwing;",
+        ],
+    )
+    db_path = tmp_path / "test.db"
+    result = add_median_price_records(db_path, csv_path)
+    assert result == (2, 2, 0)
+    rows = {row.nis_code: row for row in load_median_orm_rows(HuisVinderDb(database_path=db_path))}
+    assert rows["24062"].municipality == "Leuven"
+    assert rows["24062"].median_price == Decimal("372500.5")
+    assert rows["11005"].median_price is None
+
+
+def test_median_price_region_aggregate_keeps_four_digit_nis(tmp_path: Path):
+    csv_path = write_median_csv(
+        tmp_path / "wo07.csv", ["Vlaams Gewest;2000;Mediaanprijs huizen;2010;Alle huizen;200000,0"]
+    )
+    db_path = tmp_path / "test.db"
+    assert add_median_price_records(db_path, csv_path) == (1, 1, 0)
+    (row,) = load_median_orm_rows(HuisVinderDb(database_path=db_path))
+    assert row.nis_code == "2000"
+    assert row.median_price == Decimal(200000)
+
+
+def test_median_price_reload_is_idempotent(tmp_path: Path):
+    csv_path = write_median_csv(
+        tmp_path / "wo07.csv",
+        [
+            "Leuven;24062;Mediaanprijs huizen;2024;Alle huizen;372500,0",
+            "Leuven;24062;Mediaanprijs huizen;2024;Open bebouwing;450000,0",
+        ],
+    )
+    db_path = tmp_path / "test.db"
+    add_median_price_records(db_path, csv_path)
+    add_median_price_records(db_path, csv_path)
+    assert len(load_median_orm_rows(HuisVinderDb(database_path=db_path))) == 2
+
+
+def test_median_price_invalid_row_is_skipped_and_logged(tmp_path: Path, caplog):
+    csv_path = write_median_csv(
+        tmp_path / "wo07.csv",
+        [
+            "Leuven;24062;Mediaanprijs huizen;2024;Alle huizen;372500,0",
+            "Nergens;XYZ42;Mediaanprijs huizen;2024;Alle huizen;100000,0",
+        ],
+    )
+    db_path = tmp_path / "test.db"
+    with caplog.at_level("WARNING"):
+        result = add_median_price_records(db_path, csv_path)
+    assert result == (2, 1, 1)
+    assert "nis=XYZ42" in caplog.text
+    (row,) = load_median_orm_rows(HuisVinderDb(database_path=db_path))
+    assert row.nis_code == "24062"

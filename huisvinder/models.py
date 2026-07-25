@@ -495,6 +495,44 @@ class PropertySalesRecord(BaseModel):
         return self
 
 
+def _clean_number(value: Any) -> Any:
+    """This export uses '.' as thousands separator, ',' as decimal mark and ':' / '' for missing."""
+    if isinstance(value, str):
+        stripped = value.strip().replace(".", "").replace(",", ".")
+        if stripped in {"", ":", "-", "NA"}:
+            return None
+        return stripped
+    return value
+
+
+Number = Annotated[Decimal | None, BeforeValidator(_clean_number)]
+
+
+class MedianPriceRecord(BaseModel):
+    """One municipality/year/type row of the Gemeente-Stadsmonitor median price
+    dataset (indicator WO_07, semicolon-separated CSV).
+
+    Field names are English; aliases match the Dutch column headers.
+    """
+
+    model_config = ConfigDict(
+        populate_by_name=True,
+        str_strip_whitespace=True,
+        extra="forbid",
+        frozen=True,
+    )
+
+    municipality: str = Field(alias="Gemeente")
+    # municipalities have 5-digit codes; region aggregates (Vlaams Gewest = 2000) have 4
+    nis_code: str = Field(
+        alias="NIS-code", description="NIS code, kept as str to preserve leading zeros", pattern=r"^\d{4,5}$"
+    )
+    indicator: str = Field(alias="Indicator")
+    year: int = Field(alias="Jaar", ge=1900, le=2100)
+    property_type: str = Field(alias="Type")
+    median_price: Number = Field(alias="Mediaanprijs (in euro)", default=None, ge=0)
+
+
 class Simulation(BaseModel):
     budget: float = 400000
     localities: list[str] = ["BIERBEEK", "HOLSBEEK", "LEUVEN", "OUD-HEVERLEE", "LUBBEEK"]

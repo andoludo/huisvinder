@@ -9,9 +9,9 @@ from sqlalchemy import Engine, create_engine, insert
 from sqlalchemy.dialects.sqlite import insert as sqlite_insert
 from sqlmodel import Session, col, select
 
-from huisvinder.database.schemas import BaseHouseORM, PropertySalesRecordORM
+from huisvinder.database.schemas import BaseHouseORM, MedianPriceRecordORM, PropertySalesRecordORM
 from huisvinder.database.scripts.upgrade import upgrade
-from huisvinder.models import BaseHouse, PropertyCategory, PropertySalesRecord
+from huisvinder.models import BaseHouse, MedianPriceRecord, PropertyCategory, PropertySalesRecord
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +52,17 @@ class HuisVinderDb(BaseModel):
             # executemany in one transaction: a single multi-VALUES statement for
             # ~37k rows x 20 columns would exceed SQLite's bind-parameter limit
             stmt = insert(PropertySalesRecordORM).prefix_with("OR REPLACE")
+            for start in range(0, len(records_), BATCH_SIZE):
+                session.exec(stmt, params=records_[start : start + BATCH_SIZE])
+            session.commit()
+
+    def add_median_price_records(self, records: list[MedianPriceRecord]) -> None:
+        """Upsert Gemeente-Stadsmonitor rows on the (nis_code, indicator, year, property_type) primary key."""
+        if not records:
+            return
+        with Session(self._engine) as session:
+            records_ = [r.model_dump() for r in records]
+            stmt = insert(MedianPriceRecordORM).prefix_with("OR REPLACE")
             for start in range(0, len(records_), BATCH_SIZE):
                 session.exec(stmt, params=records_[start : start + BATCH_SIZE])
             session.commit()

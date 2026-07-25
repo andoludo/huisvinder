@@ -1,3 +1,4 @@
+import csv
 import logging
 from collections.abc import Iterator, Sequence
 from datetime import datetime
@@ -10,7 +11,7 @@ from pydantic import ValidationError
 
 from huisvinder.database.crud import HuisVinderDb
 from huisvinder.details import enrich_houses
-from huisvinder.models import BaseHouse, BaseSource, PropertySalesRecord, Simulation
+from huisvinder.models import BaseHouse, BaseSource, MedianPriceRecord, PropertySalesRecord, Simulation
 from huisvinder.sources.bond_immo import BondImmo
 from huisvinder.sources.bvm_vastgoed import BVMVastgoed
 from huisvinder.sources.century_21 import Century21
@@ -197,6 +198,57 @@ def add_property_sales_record(database_path: Path, workbook_path: Path = STATIST
     """Load the Statbel quarterly sales-per-municipality workbook into the database."""
     records = load_property_sales_records(workbook_path)
     HuisVinderDb(database_path=database_path).add_property_sales_records(records)
+
+
+STATISTICS_MEDIAN_CSV = Path(__file__).parent / "statistics" / "gemeentestadsmonitor_WO_07.csv"
+
+
+class MedianPriceLoadResult(NamedTuple):
+    """Outcome of a median-price CSV load; skipped rows failed validation and were logged."""
+
+    rows_read: int
+    rows_loaded: int
+    rows_skipped: int
+
+
+def _load_median_price_records(csv_path: Path) -> tuple[list[MedianPriceRecord], int]:
+    """Parse the Gemeente-Stadsmonitor WO_07 CSV into validated records and the raw row count.
+
+    A row that fails validation is skipped (and logged with its identifier)
+    rather than aborting the load: one malformed row should not block the
+    remaining ~14k statistical rows."""
+    records: list[MedianPriceRecord] = []
+    rows_read = 0
+    # utf-8-sig: the current export is plain ASCII, but this monitor's CSV
+    # downloads sometimes carry a UTF-8 BOM that would corrupt the first header
+    with csv_path.open(encoding="utf-8-sig", newline="") as handle:
+        for row in csv.DictReader(handle, delimiter=";"):
+            rows_read += 1
+            try:
+                records.append(MedianPriceRecord.model_validate(row))
+            except ValidationError as error:
+                logger.warning(
+                    "Skipping median-price row nis=%s jaar=%s type=%s: %s",
+                    row.get("NIS-code"),
+                    row.get("Jaar"),
+                    row.get("Type"),
+                    error,
+                )
+    logger.info(
+        "%s: %d rows read, %d parsed, %d skipped", csv_path.name, rows_read, len(records), rows_read - len(records)
+    )
+    return records, rows_read
+
+
+def add_median_price_records(database_path: Path, csv_path: Path = STATISTICS_MEDIAN_CSV) -> MedianPriceLoadResult:
+    """Load the Gemeente-Stadsmonitor median price CSV (indicator WO_07) into the database.
+
+    Idempotent: rows are upserted on the (nis_code, indicator, year,
+    property_type) natural key in one transaction, so re-running replaces
+    matching rows instead of duplicating them."""
+    records, rows_read = _load_median_price_records(csv_path)
+    HuisVinderDb(database_path=database_path).add_median_price_records(records)
+    return MedianPriceLoadResult(rows_read=rows_read, rows_loaded=len(records), rows_skipped=rows_read - len(records))
 
 
 class LocalityPrices(NamedTuple):
@@ -421,12 +473,135 @@ def _epc_figure(houses: Sequence[BaseHouse], budget: float) -> go.Figure:
     return figure
 
 
+# colour per Flemish EPC label for figure 3, reusing the figure-2 band shading;
+# A+ (epc <= 0) gets its own darker green
+EPC_COLORS: dict[str, str] = {"A+": "#006837", **{label: colour for _, _, label, colour in _EPC_BANDS}}
+_EPC_UNKNOWN_COLOR = "#999999"
+
+AMENITY_SYMBOLS: dict[str, str] = {
+    "garden_and_garage": "diamond",
+    "garage_only": "square",
+    "garden_only": "triangle-up",
+    "none": "circle",
+}
+_SWATCH_COLOR = "#555555"  # neutral marker colour for the amenity shape swatches
+_MARKER = {"size": 9, "line": {"width": 0.5, "color": "#333333"}}
+
+
+def _epc_label(epc: int | None) -> str | None:
+    """Flemish EPC band letter for a measured kWh/m² value; <= 0 is A+, None stays None."""
+    if epc is None:
+        return None
+    if epc <= 0:
+        return "A+"
+    return next((label for _, high, label, _ in _EPC_BANDS if high is None or epc < high), None)
+
+
+def _epc_colour(epc: int | None) -> str:
+    label = _epc_label(epc)
+    if label is None:
+        return _EPC_UNKNOWN_COLOR
+    return EPC_COLORS.get(label.strip().upper(), _EPC_UNKNOWN_COLOR)
+
+
+def _amenity_category(house: BaseHouse) -> str:
+    """Four-way garden/garage bucket; an unknown (None) flag counts as absent."""
+    if house.garden and house.garage:
+        return "garden_and_garage"
+    if house.garage:
+        return "garage_only"
+    if house.garden:
+        return "garden_only"
+    return "none"
+
+
+def _price_area_figure(houses: Sequence[BaseHouse]) -> go.Figure:
+    """Price/living-area scatter for houses: colour = EPC band, symbol = garden/garage.
+
+    The interactive legend lists cities (click to toggle, double-click to
+    isolate); a second legend holds non-interactive EPC and amenity swatches
+    so colour and shape stay decodable. Rows without a price or living area
+    are dropped; grouping normalises city casing/whitespace."""
+    figure = go.Figure()
+    rows = [house for house in houses if house.price is not None and house.living_area is not None]
+    by_city: dict[str, list[BaseHouse]] = {}
+    for house in rows:
+        by_city.setdefault((house.city or "").strip().upper() or "unknown", []).append(house)
+    for city, city_rows in sorted(by_city.items(), key=lambda item: -len(item[1])):
+        figure.add_scatter(
+            x=[house.living_area for house in city_rows],
+            y=[house.price for house in city_rows],
+            mode="markers",
+            name=f"{city} ({len(city_rows)})",
+            legendgroup="cities",
+            marker={
+                **_MARKER,
+                "color": [_epc_colour(house.epc) for house in city_rows],
+                "symbol": [AMENITY_SYMBOLS[_amenity_category(house)] for house in city_rows],
+            },
+            customdata=[
+                [
+                    _epc_label(house.epc) or "?",
+                    house.epc if house.epc is not None else "?",
+                    _amenity_category(house).replace("_", " "),
+                    house.link,
+                ]
+                for house in city_rows
+            ],
+            hovertemplate=(
+                city + " | €%{y:,.0f} | %{x:.0f} m²<br>EPC %{customdata[0]} (%{customdata[1]} kWh/m²)"
+                " | %{customdata[2]}<br>%{customdata[3]}<extra></extra>"
+            ),
+        )
+    if not rows:
+        figure.add_annotation(text="no house listings with both a price and a living area", showarrow=False)
+    for label, colour in {**EPC_COLORS, "unknown": _EPC_UNKNOWN_COLOR}.items():
+        figure.add_scatter(
+            x=[None],
+            y=[None],
+            mode="markers",
+            marker={**_MARKER, "color": colour},
+            name=f"EPC {label}",
+            legend="legend2",
+            legendgroup="epc",
+            legendgrouptitle={"text": "colour: EPC band"},
+            hoverinfo="skip",
+            showlegend=True,
+        )
+    for category, symbol in AMENITY_SYMBOLS.items():
+        figure.add_scatter(
+            x=[None],
+            y=[None],
+            mode="markers",
+            marker={**_MARKER, "color": _SWATCH_COLOR, "symbol": symbol},
+            name=category.replace("_", " "),
+            legend="legend2",
+            legendgroup="amenities",
+            legendgrouptitle={"text": "symbol: garden/garage"},
+            hoverinfo="skip",
+            showlegend=True,
+        )
+    figure.update_layout(
+        title={
+            "text": "Price versus living area for live house listings"
+            "<br><sub>category 'house' only; colour = Flemish EPC band, symbol = garden/garage; "
+            "click a city in the legend to toggle it, double-click to isolate</sub>"
+        },
+        xaxis_title="Living area (m²)",
+        yaxis_title="Price (€)",
+        height=650,
+        legend={"title": {"text": "city (listings)"}},
+        legend2={"title": {"text": "reference"}, "x": 1.02, "xanchor": "left", "y": 0.0, "yanchor": "bottom"},
+    )
+    return figure
+
+
 def create_report(
     database_path: Path,
     simulation: Simulation | None = None,
     output_path: Path | None = None,
 ) -> Path:
-    """Write a self-contained interactive HTML report with both figures.
+    """Write a self-contained interactive HTML report with all three figures.
 
     plotly.js is inlined (roughly 4 MB) so the file opens fully offline.
     Returns the path of the written report (default: next to the database).
@@ -440,6 +615,7 @@ def create_report(
     houses = database.get_priced_epc_houses()
     budget_figure = _budget_figure(summaries, simulation.budget)
     epc_figure = _epc_figure(houses, simulation.budget)
+    price_area_figure = _price_area_figure(houses)
     html = f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>HuisVinder report</title></head>
 <body style="font-family: sans-serif; max-width: 1100px; margin: auto;">
@@ -454,6 +630,7 @@ LEUVEN). No mapping between the two exists yet, so the figures are on different 
 levels and cannot be compared city by city.</p>
 {budget_figure.to_html(full_html=False, include_plotlyjs=True)}
 {epc_figure.to_html(full_html=False, include_plotlyjs=False)}
+{price_area_figure.to_html(full_html=False, include_plotlyjs=False)}
 </body></html>"""
     output_path.write_text(html, encoding="utf-8")
     logger.info("Report written to %s", output_path)
