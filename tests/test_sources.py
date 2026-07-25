@@ -34,6 +34,7 @@ from huisvinder.sources.immowonen import ImmoWonen
 from huisvinder.sources.janstas import JanStas
 from huisvinder.sources.kdc_immo import KDCImmo
 from huisvinder.sources.marnix_vastgoed import MarnixVastgoed
+from huisvinder.sources.polares import Polares
 from huisvinder.sources.realium import Realium
 from huisvinder.sources.realo import Realo
 from huisvinder.sources.ter_duin import ImmoTerDuin
@@ -54,10 +55,16 @@ class SourceCase:
     first: dict[str, str | float | None] = field(default_factory=dict)
     statuses: dict[str, int] | None = None
     json_based: bool = False
+    fetch_attr: str = ""  # patched fetch helper; default get_json/get_static_soup
 
     @property
     def id(self) -> str:
         return self.source_class.__name__
+
+    @property
+    def patch_target(self) -> str:
+        attr = self.fetch_attr or ("get_json" if self.json_based else "get_static_soup")
+        return f"{self.module}.{attr}"
 
 
 CASES = [
@@ -457,6 +464,29 @@ CASES = [
         },
     ),
     SourceCase(
+        Polares,
+        "huisvinder.sources.polares",
+        "polares.json",
+        cards_in_fixture=5,
+        expected_count=5,
+        n_page_urls=3,
+        json_based=True,
+        fetch_attr="post_json",
+        statuses={"available": 1, "sold": 4},
+        first={
+            "link": "https://www.polares.eu/nl/aanbod/te-koop/leuven/woning-in-naamsesteenweg-345/8990196",
+            "display_price": "€ 485.000",
+            "price": 485000.0,
+            "city": "LEUVEN",
+            "address": "Naamsesteenweg 345, 3001 Leuven",
+            "category": "house",
+            "status": "available",
+            "bedrooms": 4,
+            "living_area": 121.0,
+            "surface_ground": 67.0,
+        },
+    ),
+    SourceCase(
         ERALeuven,
         "huisvinder.sources.era_leuven",
         "eraleuven.json",
@@ -513,9 +543,9 @@ CASE_IDS = [case.id for case in CASES]
 def parse_fixture(case: SourceCase) -> list[BaseHouse]:
     source = case.source_class()
     if case.json_based:
-        with patch(f"{case.module}.get_json", return_value=load_fixture_json(case.fixture)):
+        with patch(case.patch_target, return_value=load_fixture_json(case.fixture)):
             return source._get_page_data("http://fixture.test/")
-    with patch(f"{case.module}.get_static_soup", return_value=load_fixture_soup(case.fixture)):
+    with patch(case.patch_target, return_value=load_fixture_soup(case.fixture)):
         return source._get_page_data("http://fixture.test/")
 
 
@@ -546,11 +576,11 @@ def test_empty_page_yields_no_houses(case):
     source = case.source_class()
     if case.json_based:
         empty: dict[str, list[object]] = {"data": [], "Publications": [], "results": []}
-        with patch(f"{case.module}.get_json", return_value=empty):
+        with patch(case.patch_target, return_value=empty):
             houses = source._get_page_data("http://fixture.test/")
     else:
         soup = BeautifulSoup(EMPTY_HTML, "html.parser")
-        with patch(f"{case.module}.get_static_soup", return_value=soup):
+        with patch(case.patch_target, return_value=soup):
             houses = source._get_page_data("http://fixture.test/")
     assert houses == []
 

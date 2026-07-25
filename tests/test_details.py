@@ -75,6 +75,12 @@ PLATFORM_CASES = [
         {"epc": 377, "epc_is_estimated": False, "garage": True},
     ),
     (
+        "polares.html",  # Next.js: spec lists live in the __NEXT_DATA__ blob
+        "Polares",
+        # rooms list has 'Garage: 1'; no garden row on this property
+        {"epc": 213, "epc_is_estimated": False, "garage": True, "garden": None},
+    ),
+    (
         "eraleuven.html",  # Drupal fields, English labels
         "ERALeuven",
         {

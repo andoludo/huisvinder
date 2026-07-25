@@ -105,3 +105,17 @@ def get_static_soup(url: str) -> BeautifulSoup:
 def get_json(url: str) -> Any:
     """Fetch a JSON endpoint with the same politeness and retry policy."""
     return _fetch(url).json()
+
+
+@retry(
+    reraise=True,
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=0.5, min=0.5, max=8.0),
+)
+def post_json(url: str, payload: dict[str, Any]) -> Any:
+    """POST a JSON body (search APIs) with the same politeness and retry policy."""
+    sleep(request_delay())
+    logger.debug("POST %s", url)
+    response = _http_client().post(url, json=payload)
+    response.raise_for_status()
+    return response.json()

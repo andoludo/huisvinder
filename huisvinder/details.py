@@ -84,6 +84,7 @@ def harvest_pairs(soup: BeautifulSoup) -> dict[str, str]:
             add(children[0].get_text(" ", strip=True), children[1].get_text(" ", strip=True))
     _harvest_heading_blocks(soup, add)
     _harvest_drupal_fields(soup, add)
+    _harvest_next_data(soup, add)
     return pairs
 
 
@@ -118,6 +119,28 @@ def _harvest_drupal_fields(soup: BeautifulSoup, add: Callable[[str, str], None])
         label = label_tag.get_text(" ", strip=True)
         value = field.get_text(" ", strip=True).removeprefix(label)
         add(label, value)
+
+
+def _harvest_next_data(soup: BeautifulSoup, add: Callable[[str, str], None]) -> None:
+    """Next.js sites (polares.eu) render their spec lists client-side; the
+    __NEXT_DATA__ blob carries them as {label, value} rows."""
+    script = soup.find("script", id="__NEXT_DATA__")
+    if script is None:
+        return
+    try:
+        data = json.loads(script.get_text() or "")
+    except json.JSONDecodeError:
+        return
+    stack: list[object] = [data]
+    while stack:
+        node = stack.pop()
+        if isinstance(node, dict):
+            label, value = node.get("label"), node.get("value")
+            if isinstance(label, str) and isinstance(value, str | int | float) and not isinstance(value, bool):
+                add(label, str(value))
+            stack.extend(node.values())
+        elif isinstance(node, list):
+            stack.extend(node)
 
 
 _CLASSIFIED_BLOB = re.compile(r"window\.classified\s*=\s*(\{.*?\});", re.DOTALL)

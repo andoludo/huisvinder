@@ -27,4 +27,5 @@ Sources = Literal[
     "BondImmo",
     "ERALeuven",
     "KDCImmo",
+    "Polares",
 ]

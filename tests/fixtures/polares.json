@@ -1,0 +1,326 @@
+{
+ "success": true,
+ "data": {
+  "totalDocs": 26,
+  "limit": 19,
+  "totalPages": 2,
+  "page": 1,
+  "pagingCounter": 1,
+  "hasPrevPage": false,
+  "hasNextPage": true,
+  "prevPage": null,
+  "nextPage": 2,
+  "docs": [
+   {
+    "_id": "6a3c119dbf36ff0ee11cde2c",
+    "id": "8990196",
+    "bathrooms": 1,
+    "bedrooms": 4,
+    "images": [
+     {
+      "name": "skarabee/picture/8990196/08990196_1.jpg",
+      "type": "PRINTS",
+      "filename": "08990196_1.jpg",
+      "url": "https://amai.fra1.digitaloceanspaces.com/polares/uploads/skarabee/property/8990196/images/fa516aec-8d4a-47ab-bc5a-1f0adea7da4d.jpeg",
+      "Etag": "\"813d158e1d96ee61067ce52d46f56c04\"",
+      "key": "polares/uploads/skarabee/property/8990196/images/fa516aec-8d4a-47ab-bc5a-1f0adea7da4d.jpeg",
+      "ordinal": 1
+     }
+    ],
+    "is_project": false,
+    "labels": [],
+    "location": {
+     "hidden": false,
+     "city": "Leuven",
+     "postal_code": "3001",
+     "number": 345,
+     "street": "Naamsesteenweg",
+     "country": "BE",
+     "box": "",
+     "geo": {
+      "latitude": 50.85849,
+      "longitude": 4.69605
+     },
+     "point": {
+      "type": "Point",
+      "coordinates": [
+       50.85849,
+       4.69605
+      ]
+     },
+     "postcode_slug": "3001-heverlee",
+     "postcode_slugs": {
+      "default": "3001-heverlee",
+      "en": "3001-heverlee",
+      "fr": "3001-heverlee",
+      "nl": "3001-heverlee"
+     }
+    },
+    "negotiation": "sale",
+    "price": {
+     "currency": "EUR",
+     "amount": 485000,
+     "hidden": false
+    },
+    "sizes": {
+     "liveable_area": {
+      "size": 121
+     },
+     "plot_area": {
+      "size": 67
+     }
+    },
+    "status": "available",
+    "type": "house"
+   },
+   {
+    "_id": "6a0dcfdcbf36ff0ee1c7e5f9",
+    "id": "8959758",
+    "bathrooms": 1,
+    "bedrooms": 3,
+    "images": [
+     {
+      "name": "skarabee/picture/8959758/08959758_1.jpg",
+      "type": null,
+      "filename": "08959758_1.jpg",
+      "url": "https://amai.fra1.digitaloceanspaces.com/polares/uploads/skarabee/property/8959758/images/e325f38b-4ab3-4764-92e0-568b4dad3a90.jpeg",
+      "Etag": "\"caf82929335071294cb3c0caed0ae391\"",
+      "key": "polares/uploads/skarabee/property/8959758/images/e325f38b-4ab3-4764-92e0-568b4dad3a90.jpeg",
+      "ordinal": 1
+     }
+    ],
+    "is_project": false,
+    "labels": [],
+    "location": {
+     "hidden": false,
+     "city": "Leuven",
+     "postal_code": "3010",
+     "number": 29,
+     "street": "Richard Valvekensstraat",
+     "country": "BE",
+     "box": "",
+     "geo": {
+      "latitude": 50.88333,
+      "longitude": 4.72599
+     },
+     "point": {
+      "type": "Point",
+      "coordinates": [
+       50.88333,
+       4.72599
+      ]
+     },
+     "postcode_slug": "3010-kessel-lo",
+     "postcode_slugs": {
+      "default": "3010-kessel-lo",
+      "en": "3010-kessel-lo",
+      "fr": "3010-kessel-lo",
+      "nl": "3010-kessel-lo"
+     }
+    },
+    "negotiation": "sale",
+    "price": {
+     "currency": "EUR",
+     "amount": 369500,
+     "hidden": false
+    },
+    "sizes": {
+     "liveable_area": {
+      "size": 201
+     },
+     "plot_area": {
+      "size": 340
+     }
+    },
+    "status": "sold",
+    "type": "house"
+   },
+   {
+    "_id": "6978c258da48e305c8d141e3",
+    "id": "8854839",
+    "bathrooms": 1,
+    "bedrooms": 4,
+    "images": [
+     {
+      "name": "skarabee/picture/8854839/08854839_1.jpg",
+      "type": null,
+      "filename": "08854839_1.jpg",
+      "url": "https://amai.fra1.digitaloceanspaces.com/polares/uploads/skarabee/property/8854839/images/b87b5019-b00b-4483-8fdb-7fa49359f26a.jpeg",
+      "Etag": "\"adb8d2c02cc04d8911cd60fcfaff7dc3\"",
+      "key": "polares/uploads/skarabee/property/8854839/images/b87b5019-b00b-4483-8fdb-7fa49359f26a.jpeg",
+      "ordinal": 1
+     }
+    ],
+    "is_project": false,
+    "labels": [],
+    "location": {
+     "hidden": false,
+     "city": "Kessel-Lo",
+     "postal_code": "3010",
+     "number": 69,
+     "street": "Lindensestraat",
+     "country": "BE",
+     "box": "",
+     "geo": {
+      "latitude": 50.88526,
+      "longitude": 4.7257
+     },
+     "point": {
+      "type": "Point",
+      "coordinates": [
+       50.88526,
+       4.7257
+      ]
+     },
+     "postcode_slug": "3010-kessel-lo",
+     "postcode_slugs": {
+      "default": "3010-kessel-lo",
+      "en": "3010-kessel-lo",
+      "fr": "3010-kessel-lo",
+      "nl": "3010-kessel-lo"
+     }
+    },
+    "negotiation": "sale",
+    "price": {
+     "currency": "EUR",
+     "amount": 389000,
+     "hidden": false
+    },
+    "sizes": {
+     "liveable_area": {
+      "size": 146.2
+     },
+     "plot_area": {
+      "size": 153
+     }
+    },
+    "status": "sold",
+    "type": "house"
+   },
+   {
+    "_id": "695d1414da48e305c876c3d4",
+    "id": "8835096",
+    "bathrooms": 1,
+    "bedrooms": 3,
+    "images": [
+     {
+      "name": "skarabee/picture/8835096/08835096_1.jpg",
+      "type": "PRINTS",
+      "filename": "08835096_1.jpg",
+      "url": "https://amai.fra1.digitaloceanspaces.com/polares/uploads/skarabee/property/8835096/images/5e870d10-fdec-4ba3-95f0-01ae78d6876f.jpeg",
+      "Etag": "\"2ee462898bcf243f770dde45105c6f40\"",
+      "key": "polares/uploads/skarabee/property/8835096/images/5e870d10-fdec-4ba3-95f0-01ae78d6876f.jpeg",
+      "ordinal": 1
+     }
+    ],
+    "is_project": false,
+    "labels": [],
+    "location": {
+     "hidden": false,
+     "city": "Leuven",
+     "postal_code": "3000",
+     "number": 52,
+     "street": "Mechelsesteenweg",
+     "country": "BE",
+     "box": "",
+     "geo": {
+      "latitude": 50.89169,
+      "longitude": 4.69243
+     },
+     "point": {
+      "type": "Point",
+      "coordinates": [
+       50.89169,
+       4.69243
+      ]
+     },
+     "postcode_slug": "3000-leuven",
+     "postcode_slugs": {
+      "default": "3000-leuven",
+      "en": "3000-leuven",
+      "fr": "3000-leuven",
+      "nl": "3000-leuven"
+     }
+    },
+    "negotiation": "sale",
+    "price": {
+     "currency": "EUR",
+     "amount": 295000,
+     "hidden": false
+    },
+    "sizes": {
+     "liveable_area": {
+      "size": 128
+     },
+     "plot_area": {
+      "size": 250
+     }
+    },
+    "status": "sold",
+    "type": "house"
+   },
+   {
+    "_id": "68e22d41617e215d7333f15e",
+    "id": "8753870",
+    "bathrooms": 1,
+    "bedrooms": 4,
+    "images": [
+     {
+      "name": "skarabee/picture/8753870/08753870_1.jpg",
+      "type": "PRINTS",
+      "filename": "08753870_1.jpg",
+      "url": "https://amai.fra1.digitaloceanspaces.com/polares/uploads/skarabee/property/8753870/images/3b8d0ed0-8b40-4bee-abd4-fd0f1ae7b2f0.jpeg",
+      "Etag": "\"2225b26a82575857ecc4db9058e70198\"",
+      "key": "polares/uploads/skarabee/property/8753870/images/3b8d0ed0-8b40-4bee-abd4-fd0f1ae7b2f0.jpeg",
+      "ordinal": 1
+     }
+    ],
+    "is_project": false,
+    "labels": [],
+    "location": {
+     "hidden": false,
+     "city": "Kessel-Lo",
+     "postal_code": "3010",
+     "number": 42,
+     "street": "Karekietenlaan",
+     "country": "BE",
+     "box": "",
+     "geo": {
+      "latitude": 50.90267,
+      "longitude": 4.72297
+     },
+     "point": {
+      "type": "Point",
+      "coordinates": [
+       50.90267,
+       4.72297
+      ]
+     },
+     "postcode_slug": "3010-kessel-lo",
+     "postcode_slugs": {
+      "default": "3010-kessel-lo",
+      "en": "3010-kessel-lo",
+      "fr": "3010-kessel-lo",
+      "nl": "3010-kessel-lo"
+     }
+    },
+    "negotiation": "sale",
+    "price": {
+     "currency": "EUR",
+     "amount": 484000,
+     "hidden": false
+    },
+    "sizes": {
+     "liveable_area": {
+      "size": 146
+     },
+     "plot_area": {
+      "size": 201
+     }
+    },
+    "status": "sold",
+    "type": "house"
+   }
+  ]
+ }
+}
