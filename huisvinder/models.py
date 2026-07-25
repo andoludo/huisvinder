@@ -146,6 +146,9 @@ _EPC_MISSING = {"", "-", "--", "n/a", "nvt", "onbekend"}
 # first number in the string; the lookbehinds keep the "2" in the "m 2" unit
 # spelling from being read as the value when the number comes later or not at all
 _EPC_NUMBER = re.compile(r"(?<!m )(?<!m)\d+(?:[.,]\d+)?")
+# dot-grouped thousands ("1.074 kWh/m²/year" on kdcimmo): the dot is a
+# separator, not a decimal point
+_EPC_THOUSANDS = re.compile(r"\d{1,3}(?:\.\d{3})+")
 _EPC_LABEL = re.compile(r"^\(?\s*([a-g])\s*([+-])?\s*\)?$", re.IGNORECASE)
 
 # Midpoint of each Flemish residential EPC band (kWh/m² per year). A+ is <= 0,
@@ -184,7 +187,10 @@ def parse_epc_with_source(value: Any) -> tuple[Any, bool | None]:
     if text.casefold() in _EPC_MISSING:
         return None, None
     if number_match := _EPC_NUMBER.search(text):
-        number = round(float(number_match.group().replace(",", ".")))
+        token = number_match.group()
+        if _EPC_THOUSANDS.fullmatch(token):
+            token = token.replace(".", "")
+        number = round(float(token.replace(",", ".")))
         if 0 <= number <= EPC_SANITY_MAX:
             return number, False
         logger.debug("EPC value %r outside the [0, %d] sanity bound, storing None", value, EPC_SANITY_MAX)

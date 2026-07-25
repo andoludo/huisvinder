@@ -12,10 +12,19 @@ from huisvinder.config import MAX_PRICE
 from huisvinder.models import BaseHouse, BaseSource
 from huisvinder.utils import get_static_soup, normalize_status, within_budget
 
-# Whise feature-list labels (Dutch) as rendered in each card's <i> tag
-_FEATURE_BEDROOMS = "Slaapkamers"
-_FEATURE_LIVING = "Leefruimte"
-_FEATURE_GROUND = "Titles.surface_ground"
+# Whise feature-list labels as rendered in each card's <i> tag; sites serve
+# them in Dutch or English depending on the configured locale (the ground
+# label stays the untranslated template key on both)
+_FEATURE_BEDROOMS = ("Slaapkamers", "Bedrooms")
+_FEATURE_LIVING = ("Leefruimte", "Living area")
+_FEATURE_GROUND = ("Titles.surface_ground",)
+
+
+def _feature(features: dict[str, str], labels: tuple[str, ...]) -> str | None:
+    for label in labels:
+        if label in features:
+            return features[label]
+    return None
 
 
 def _features(card: Tag) -> dict[str, str]:
@@ -74,9 +83,9 @@ class WhiseGridSource(BaseSource):
                     "city": city_tag.get_text(strip=True) if city_tag else None,
                     "display_price": price,
                     "status": status,
-                    "bedrooms": features.get(_FEATURE_BEDROOMS),
-                    "living_area": features.get(_FEATURE_LIVING),
-                    "surface_ground": features.get(_FEATURE_GROUND),
+                    "bedrooms": _feature(features, _FEATURE_BEDROOMS),
+                    "living_area": _feature(features, _FEATURE_LIVING),
+                    "surface_ground": _feature(features, _FEATURE_GROUND),
                 }
             )
         return [BaseHouse.model_validate(r) for r in results]

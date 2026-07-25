@@ -29,6 +29,7 @@ from huisvinder.sources.immovlan import Immovlan
 from huisvinder.sources.immoweb import Immoweb
 from huisvinder.sources.immowonen import ImmoWonen
 from huisvinder.sources.janstas import JanStas
+from huisvinder.sources.kdc_immo import KDCImmo
 from huisvinder.sources.marnix_vastgoed import MarnixVastgoed
 from huisvinder.sources.realium import Realium
 from huisvinder.sources.realo import Realo
@@ -65,6 +66,7 @@ SOURCES: list[type[BaseSource]] = [
     VastgoedSV,
     BondImmo,
     ERALeuven,
+    KDCImmo,
 ]
 
 

@@ -32,6 +32,7 @@ from huisvinder.sources.immovlan import Immovlan
 from huisvinder.sources.immoweb import Immoweb
 from huisvinder.sources.immowonen import ImmoWonen
 from huisvinder.sources.janstas import JanStas
+from huisvinder.sources.kdc_immo import KDCImmo
 from huisvinder.sources.marnix_vastgoed import MarnixVastgoed
 from huisvinder.sources.realium import Realium
 from huisvinder.sources.realo import Realo
@@ -433,6 +434,26 @@ CASES = [
             "bedrooms": 3,
             "living_area": 86.0,
             "surface_ground": 71.0,
+        },
+    ),
+    SourceCase(
+        KDCImmo,
+        "huisvinder.sources._whise",
+        "kdcimmo.html",
+        cards_in_fixture=4,
+        expected_count=4,
+        n_page_urls=1,
+        statuses={"available": 3, "option": 1},
+        first={
+            "link": "https://www.kdcimmo.be/en/house-for-sale-in-overijse/7762726",
+            "display_price": "€ 450.000",
+            "price": 450000.0,
+            "city": "OVERIJSE",
+            "category": "house",
+            "status": "available",
+            "bedrooms": 5,
+            "living_area": 250.0,
+            "surface_ground": 895.0,
         },
     ),
     SourceCase(

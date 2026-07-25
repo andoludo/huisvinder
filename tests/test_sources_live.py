@@ -19,6 +19,7 @@ from huisvinder.sources.immolight import Immolight
 from huisvinder.sources.immovlan import Immovlan
 from huisvinder.sources.immoweb import Immoweb
 from huisvinder.sources.janstas import JanStas
+from huisvinder.sources.kdc_immo import KDCImmo
 from huisvinder.sources.marnix_vastgoed import MarnixVastgoed
 from huisvinder.sources.realium import Realium
 from huisvinder.sources.realo import Realo
@@ -54,6 +55,7 @@ LIVE_SOURCES = [
     VastgoedSV,
     BondImmo,
     ERALeuven,
+    KDCImmo,
 ]
 
 

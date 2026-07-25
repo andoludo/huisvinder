@@ -159,6 +159,8 @@ EPC_CASES = [
     ("71 kWh/m²", 71, False),
     ("119.0", 119, False),
     ("557.0", 557, False),
+    # dot-grouped thousands (kdcimmo): the dot is a separator, not a decimal
+    ("1.074 kWh/m²/year", 1074, False),
     ("137 kWh/m 2 /jaar", 137, False),
     # multi-line values with a trailing band label: the number wins
     ("1413kWh/(m 2 /jaar)\n\t\t\t\t\t\t(F)", 1413, False),

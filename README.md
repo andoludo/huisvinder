@@ -1,6 +1,6 @@
 # huisvinder
 
-Scrapes houses and apartments for sale (≤ €500k, Leuven area, Belgium) from 25 real-estate sites into SQLite and CSV/JSON.
+Scrapes houses and apartments for sale (≤ €500k, Leuven area, Belgium) from 26 real-estate sites into SQLite and CSV/JSON.
 
 ## Install
 
@@ -56,7 +56,7 @@ This writes `building.report.html` next to the database, with two figures: your 
 
 ## Supported sources
 
-Immoweb, Immovlan, Realo, Homies, Century 21 Connect, Immo De Dijle, Immo Jan Stas, BVM Vastgoed, Immolight, Immo Horst, Marnix Vastgoed, Covas Immo, ImmoWonen, Your House Vastgoed, Immo Ter Duin, Realium, Immo-Time, José Ruelens, De Immo Makelaar, Immo GVE, We Invest Leuven, ERA Vandendries, ERA Leuven-region search, Vastgoed SV, Bond Immo.
+Immoweb, Immovlan, Realo, Homies, Century 21 Connect, Immo De Dijle, Immo Jan Stas, BVM Vastgoed, Immolight, Immo Horst, Marnix Vastgoed, Covas Immo, ImmoWonen, Your House Vastgoed, Immo Ter Duin, Realium, Immo-Time, José Ruelens, De Immo Makelaar, Immo GVE, We Invest Leuven, ERA Vandendries, ERA Leuven-region search, Vastgoed SV, Bond Immo, KDC Immo.
 
 ## How it works / limitations
 
